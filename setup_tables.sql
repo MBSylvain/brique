@@ -78,12 +78,15 @@ ALTER TABLE public.eleves ENABLE ROW LEVEL SECURITY;
 -- Note: Pour un système anonyme sans Auth Supabase, on filtre surtout côté Frontend,
 -- mais on peut limiter la lecture si on passe le nom/code dans les headers (plus complexe).
 -- Pour l'instant, on autorise la lecture filtrée.
+DROP POLICY IF EXISTS "Enable read for students" ON public.eleves;
 CREATE POLICY "Enable read for students" ON public.eleves
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Enable insert for VBA" ON public.eleves;
 CREATE POLICY "Enable insert for VBA" ON public.eleves
 FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Enable all for planning" ON public.planning;
 CREATE POLICY "Enable all for planning" ON public.planning
 FOR ALL USING (true) WITH CHECK (true);
 
@@ -91,9 +94,11 @@ FOR ALL USING (true) WITH CHECK (true);
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff_classes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Enable read for all authenticated/public staff" ON public.staff;
 CREATE POLICY "Enable read for all authenticated/public staff" ON public.staff
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Enable read for staff_classes" ON public.staff_classes;
 CREATE POLICY "Enable read for staff_classes" ON public.staff_classes
 FOR SELECT USING (true);
 
