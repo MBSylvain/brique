@@ -108,7 +108,7 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
     
     For i = 3 To lastRow
         ' Convertir les valeurs numériques (remplacer virgule par point pour JSON)
-        ' Colonnes : 3=Moy, 4=QCM, 5=Reg, 6=BrIB, 7=Br+, 8=TotBr, 9=Appr, 10=DST, 11=BB, 12=MoyDST, 13=Code
+        ' Colonnes : 3=Moy, 4=QCM, 5=Reg, 6=BrIB, 7=Br+, 8=TotBr, 9=Appr, 10=DST, 11=BB, 12=MoyDST, 13=Code, 14=Classe, 15=Niveau
         Dim moyenne As String: moyenne = Replace(ws.Cells(i, 3).Value, ",", ".")
         Dim qcm As String: qcm = Replace(ws.Cells(i, 4).Value, ",", ".")
         Dim regularite As String: regularite = Replace(ws.Cells(i, 5).Value, ",", ".")
@@ -120,6 +120,8 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
         Dim bb As String: bb = Replace(ws.Cells(i, 11).Value, ",", ".")
         Dim moy_dst As String: moy_dst = Replace(ws.Cells(i, 12).Value, ",", ".")
         Dim code As String: code = ws.Cells(i, 13).Value
+        Dim classe As String: classe = ws.Cells(i, 14).Value
+        Dim niveau As String: niveau = ws.Cells(i, 15).Value
         
         jsonBody = "{"
         jsonBody = jsonBody & """trimestre"": """ & trimestre & """, "
@@ -135,7 +137,9 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
         jsonBody = jsonBody & """dst"": " & IIf(IsNumeric(dst) And dst <> "", dst, "null") & ", "
         jsonBody = jsonBody & """bb"": " & IIf(IsNumeric(bb) And bb <> "", bb, "null") & ", "
         jsonBody = jsonBody & """moy_dst"": " & IIf(IsNumeric(moy_dst) And moy_dst <> "", moy_dst, "null") & ", "
-        jsonBody = jsonBody & """code"": """ & EscapeJson(code) & """ "
+        jsonBody = jsonBody & """code"": """ & EscapeJson(code) & """, "
+        jsonBody = jsonBody & """classe"": """ & EscapeJson(classe) & """, "
+        jsonBody = jsonBody & """niveau"": """ & EscapeJson(niveau) & """ "
         jsonBody = jsonBody & "}"
         
         Call SendPostRequest(httpRequest, tableName, jsonBody)
