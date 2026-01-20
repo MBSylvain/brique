@@ -22,7 +22,9 @@ Pour chaque onglet à synchroniser (votre onglet doit s'appeler `Affichage eleve
 ## 3. Préparer vos données
 *   **Colonne A & B** : Nom et Prénom de l'élève.
 *   **Colonnes C à L** : Vos différentes notes (Moyenne, QCM, etc.).
-*   **Colonne M (13ème colonne)** : Ajoutez un **Code Secret** pour chaque élève (ex: un nombre à 4 chiffres). *C'est ce code qu'ils utiliseront pour se connecter.*
+*   **Colonne M (13ème colonne)** : Ajoutez un **Code Secret** pour chaque élève.
+*   **Colonne N (14ème colonne)** : Ajoutez la **Classe** (ex: TG1, TG2).
+*   **Colonne O (15ème colonne)** : Ajoutez le **Niveau** (ex: Terminale, Première).
 
 ## 4. Utilisation
 *   Assurez-vous d'avoir une connexion internet.
@@ -30,4 +32,4 @@ Pour chaque onglet à synchroniser (votre onglet doit s'appeler `Affichage eleve
 *   Un message s'affichera une fois l'export terminé.
 
 > [!IMPORTANT]
-> Ne changez pas le nom des colonnes ni l'ordre. Le script VBA envoie désormais 13 colonnes (la 13ème étant le code secret).
+> Ne changez pas le nom des colonnes ni l'ordre. Le script VBA envoie désormais 15 colonnes.
