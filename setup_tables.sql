@@ -115,3 +115,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO public.planning (cond, rec, deriv, signe)
 VALUES ('Validé', 'En cours', 'À faire', 'Fait')
 ON CONFLICT DO NOTHING;
+
+-- Affectation classe test pour le professeur
+INSERT INTO public.staff_classes (staff_id, classe)
+SELECT id, 'TG1' FROM public.staff WHERE nom = 'PROF_TEST'
+ON CONFLICT DO NOTHING;

@@ -7,6 +7,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({ nom: '', code: '' })
+  const [role, setRole] = useState('eleve') // 'eleve' or 'staff'
   const navigate = useNavigate()
 
   const handleLogin = async (e) => {
@@ -15,26 +16,52 @@ export default function Login() {
     setError('')
 
     try {
-      // Rechercher l'élève dans la table avec Nom + Code
-      const { data, error } = await supabase
-        .from('eleves')
-        .select('*')
-        .ilike('nom', formData.nom.trim())
-        .eq('code', formData.code.trim())
-        .limit(1)
+      if (role === 'eleve') {
+        // Rechercher l'élève dans la table avec Nom + Code
+        const { data, error } = await supabase
+          .from('eleves')
+          .select('*')
+          .ilike('nom', formData.nom.trim())
+          .eq('code', formData.code.trim())
+          .limit(1)
 
-      if (error) throw error
+        if (error) throw error
 
-      if (data && data.length > 0) {
-        // Connexion réussie
-        localStorage.setItem('eleve_data', JSON.stringify(data[0]))
-        navigate('/dashboard')
+        if (data && data.length > 0) {
+          localStorage.setItem('user_type', 'eleve')
+          localStorage.setItem('eleve_data', JSON.stringify(data[0]))
+          navigate('/dashboard')
+        } else {
+          setError('Nom ou Code incorrect.')
+        }
       } else {
-        setError('Nom ou Code incorrect. Veuillez réessayer.')
+        // Rechercher dans la table staff
+        const { data, error } = await supabase
+          .from('staff')
+          .select('*')
+          .ilike('nom', formData.nom.trim())
+          .eq('code', formData.code.trim())
+          .limit(1)
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const user = data[0]
+          localStorage.setItem('user_type', 'staff')
+          localStorage.setItem('staff_data', JSON.stringify(user))
+
+          if (user.role === 'admin') {
+            navigate('/admin')
+          } else {
+            navigate('/teacher')
+          }
+        } else {
+          setError('Identifiants staff incorrects.')
+        }
       }
     } catch (err) {
       console.error(err)
-      setError('Erreur de connexion. Réessayez plus tard.')
+      setError('Erreur de connexion.')
     } finally {
       setLoading(false)
     }
@@ -50,7 +77,7 @@ export default function Login() {
       <div className="w-full max-w-[440px] relative z-10">
         <div className="glass rounded-[2.5rem] p-8 sm:p-12 shadow-2xl shadow-indigo-500/10 border border-white/10 overflow-hidden">
           {/* Header */}
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 to-indigo-400 p-0.5 mb-6 shadow-xl shadow-indigo-500/20">
               <div className="w-full h-full bg-[#0f172a] rounded-[1.4rem] flex items-center justify-center">
                 <GraduationCap className="text-indigo-400 w-10 h-10" />
@@ -59,9 +86,22 @@ export default function Login() {
             <h1 className="text-4xl font-extrabold text-white tracking-tight mb-3">
               Brique<span className="text-indigo-400">Suivi</span>
             </h1>
-            <p className="text-slate-400 font-medium text-lg">
-              Portail Élève
-            </p>
+
+            {/* Role Toggle */}
+            <div className="flex bg-slate-800/80 p-1 rounded-xl mt-6">
+              <button
+                onClick={() => setRole('eleve')}
+                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${role === 'eleve' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+              >
+                Élève
+              </button>
+              <button
+                onClick={() => setRole('staff')}
+                className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${role === 'staff' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+              >
+                Espace Staff
+              </button>
+            </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
