@@ -13,8 +13,12 @@
 - [ ] Vérification finale <!-- id: 5 -->
 
 # Portail Web / Frontend (React + Vite + Tailwind)
-- [ ] Initialiser le projet (create-vite, tailwind) <!-- id: 6 -->
-- [ ] Configuration du Routing et Page de Connexion <!-- id: 7 -->
+- [x] Initialiser le projet (create-vite, tailwind) <!-- id: 6 -->
+- [x] Configuration du Routing et Page de Connexion <!-- id: 7 -->
 - [ ] Création du Dashboard Élève (Graphiques, Notes) <!-- id: 8 -->
 - [ ] Intégration Supabase (Client JS) <!-- id: 9 -->
 - [ ] Styling et Animations (UI Premium) <!-- id: 10 -->
+
+# Git / Versioning
+- [x] Initialiser Git et premier commit local <!-- id: 11 -->
+- [x] Pousser vers GitHub (Besoin URL Remote) <!-- id: 12 -->

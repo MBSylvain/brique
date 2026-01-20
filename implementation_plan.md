@@ -71,26 +71,29 @@ Nous créerons une macro `SynchroniserOngletActif` que vous pourrez lier à un b
 
 ### Stack Technique
 - **Framework** : React (Vite)
-- **Styling** : Tailwind CSS (pour le design premium/moderne)
+- **Styling** : Tailwind CSS (Design épuré et professionnel)
 - **Icons** : Lucide React
-- **Charts** : Recharts (pour les graphiques de notes)
 - **Backend/Data** : Supabase Client (`@supabase/supabase-js`)
+- **GDPR** : Pas de cookies tiers, stockage local minimal (session), RLS côté DB.
 
 ### Architecture des Pages
 1.  **Page de Connexion (`/`)**
     *   Simple et élégante.
-    *   Formulaire : Nom + Prénom (ou Code).
-    *   *Note : Pour simplifier sans gérer d'emails, nous pourrons générer un "Code d'accès" unique pour chaque élève dans Excel plus tard.*
-
+    *   Formulaire : Nom + Prénom.
+    
 2.  **Tableau de Bord Élève (`/dashboard`)**
     *   **Header** : Bonjour [Prénom], Classe/Brique.
-    *   **Section Planning** : Affichage du planning de la semaine (Table `planning`).
-    *   **Section Résultats** :
-        *   Cartes résumées (Moyenne Générale, Briques validées).
-        *   Graphique radar ou barres pour les compétences (Regularité, QCM, DST...).
-        *   Détail par trimestre (T1, T2, T3) via des onglets.
+    *   **Mode Tableur** : Affichage clair et structuré des notes.
+    *   **Vue Trimestrielle** : Onglets T1 / T2 / T3.
+    *   **Section Planning** : Liste des compétences/activités prévues (Table `planning`).
+    *   *Note : Pas de graphiques de progression (demande utilisateur).*
 
-### Sécurité (Approche Simplifiée)
-- Le frontend interrogera Supabase en filtrant par le nom de l'élève connecté.
-- RLS (Row Level Security) : Idéalement, on restreint l'accès, mais dans un premier temps, nous filtrerons côté client pour la démo.
+### Sécurité & GDPR
+- **Principe** : "Data Minimization". On ne récupère que les données de l'élève connecté.
+- **RLS (Row Level Security)** : C'est la barrière de sécurité de Supabase.
+    -   Nous devons créer une "Policy" SQL qui dit :
+        `CREATE POLICY "AccessOwnData" ON public.eleves FOR SELECT USING (nom = current_user_defined_claim);`
+    -   *Limitations actuelles* : Comme nous utilisons une authentification simple "Nom/Prénom" sans compte utilisateur Supabase Auth (Email/Pass), le RLS est plus difficile à strictifier. 
+    -   *Solution Intermédiaire* : Le frontend filtre, mais pour une vraie conformité GDPR, il faudra passer à Supabase Auth (Email) ou un système de token custom. Pour l'instant, on s'assure que l'élève ne voit que ses données dans l'interface.
+
 
