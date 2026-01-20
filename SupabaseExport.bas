@@ -106,7 +106,7 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
     
     For i = 3 To lastRow
         ' Convertir les valeurs numériques (remplacer virgule par point pour JSON)
-        ' Colonnes : 3=Moy, 4=QCM, 5=Reg, 6=BrIB, 7=Br+, 8=TotBr, 9=Appr, 10=DST, 11=BB, 12=MoyDST
+        ' Colonnes : 3=Moy, 4=QCM, 5=Reg, 6=BrIB, 7=Br+, 8=TotBr, 9=Appr, 10=DST, 11=BB, 12=MoyDST, 13=Code
         Dim moyenne As String: moyenne = Replace(ws.Cells(i, 3).Value, ",", ".")
         Dim qcm As String: qcm = Replace(ws.Cells(i, 4).Value, ",", ".")
         Dim regularite As String: regularite = Replace(ws.Cells(i, 5).Value, ",", ".")
@@ -117,6 +117,7 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
         Dim dst As String: dst = Replace(ws.Cells(i, 10).Value, ",", ".")
         Dim bb As String: bb = Replace(ws.Cells(i, 11).Value, ",", ".")
         Dim moy_dst As String: moy_dst = Replace(ws.Cells(i, 12).Value, ",", ".")
+        Dim code As String: code = ws.Cells(i, 13).Value
         
         jsonBody = "{" & _
             """trimestre"": """ & trimestre & """, " & _
@@ -131,7 +132,8 @@ Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
             """apprentissage"": " & IIf(IsNumeric(apprentissage) And apprentissage <> "", apprentissage, "null") & ", " & _
             """dst"": " & IIf(IsNumeric(dst) And dst <> "", dst, "null") & ", " & _
             """bb"": " & IIf(IsNumeric(bb) And bb <> "", bb, "null") & ", " & _
-            """moy_dst"": " & IIf(IsNumeric(moy_dst) And moy_dst <> "", moy_dst, "null") & " " & _
+            """moy_dst"": " & IIf(IsNumeric(moy_dst) And moy_dst <> "", moy_dst, "null") & ", " & _
+            """code"": """ & EscapeJson(code) & """ " & _
             "}"
         
         Call SendPostRequest(httpRequest, tableName, jsonBody)

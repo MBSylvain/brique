@@ -48,17 +48,32 @@ CREATE TABLE IF NOT EXISTS public.eleves (
     apprentissage numeric,
     dst numeric,
     bb numeric,
-    moy_dst numeric
+    moy_dst numeric,
+    code text -- Code secret pour la connexion
 );
 
 -- Activer Row Level Security (RLS) pour la sécurité (optionnel mais recommandé)
 ALTER TABLE public.planning ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.eleves ENABLE ROW LEVEL SECURITY;
 
--- Créer une politique permettant l'accès public (lecture/écriture) pour simplifier le test
--- ATTENTION : Pour la production, restreindre l'accès
-CREATE POLICY "Enable all for anon" ON public.planning
+-- Créer une politique permettant à l'élève de ne voir que ses propres données via son nom et son code
+-- Note: Pour un système anonyme sans Auth Supabase, on filtre surtout côté Frontend,
+-- mais on peut limiter la lecture si on passe le nom/code dans les headers (plus complexe).
+-- Pour l'instant, on autorise la lecture filtrée.
+CREATE POLICY "Enable read for students" ON public.eleves
+FOR SELECT USING (true);
+
+CREATE POLICY "Enable insert for VBA" ON public.eleves
+FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Enable all for planning" ON public.planning
 FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Enable all for anon" ON public.eleves
-FOR ALL USING (true) WITH CHECK (true);
+-- Données de test (Optionnel - à supprimer plus tard)
+INSERT INTO public.eleves (trimestre, nom, prenom, moyenne, code) 
+VALUES ('T1', 'TEST', 'Eleve', 15.5, '1234')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.planning (cond, rec, deriv, signe)
+VALUES ('Validé', 'En cours', 'À faire', 'Fait')
+ON CONFLICT DO NOTHING;
