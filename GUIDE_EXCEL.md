@@ -10,7 +10,7 @@ Ce guide vous explique comment ajouter le bouton de synchronisation dans votre f
 5.  Un nouveau module nommé `SupabaseExport` devrait apparaître dans la liste à gauche.
 
 ## 2. Créer le bouton dans Excel
-Pour chaque onglet que vous souhaitez synchroniser (`Affichage-ib-planning`, `Affichage eleves T1`, etc.) :
+Pour chaque onglet à synchroniser (votre onglet doit s'appeler `Affichage eleves T1`, `Planning`, etc.) :
 
 1.  Allez sur l'onglet dans Excel.
 2.  Allez dans le ruban **Développeur** (si vous ne l'avez pas, faites un clic droit sur le ruban > Personnaliser le ruban > Cochez "Développeur").
