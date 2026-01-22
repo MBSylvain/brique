@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Table, List, Calendar, Info, HelpCircle, Copy, Check, Code } from 'lucide-react'
-
+//guide structure
 export default function GuideStructure() {
     const navigate = useNavigate()
     const [copied, setCopied] = useState(false)
