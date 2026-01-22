@@ -12,7 +12,8 @@ import {
     TrendingUp,
     BookOpen,
     Trash2,
-    Settings
+    Settings,
+    Table
 } from 'lucide-react'
 
 export default function TeacherDashboard() {
@@ -46,12 +47,12 @@ export default function TeacherDashboard() {
     useEffect(() => {
         const staffData = localStorage.getItem('staff_data')
         const userType = localStorage.getItem('user_type')
-        
+
         if (!staffData || userType !== 'teacher') {
             navigate('/')
             return
         }
-        
+
         const parsed = JSON.parse(staffData)
         setTeacher(parsed)
         fetchTeacherInfo(parsed.id)
@@ -120,9 +121,9 @@ export default function TeacherDashboard() {
             const code = generateCode()
             const { error } = await supabase
                 .from('eleves')
-                .insert([{ 
-                    nom: newEleveData.nom, 
-                    prenom: newEleveData.prenom, 
+                .insert([{
+                    nom: newEleveData.nom,
+                    prenom: newEleveData.prenom,
                     classe_id: newEleveData.classe_id,
                     code_connexion: code
                 }])
@@ -186,7 +187,7 @@ export default function TeacherDashboard() {
                 .eq('eleve_id', eleve.id)
 
             if (notesError) throw notesError
-            
+
             const flattenedNotes = notesData?.map(n => ({
                 ...n.donnees,
                 trimestre: `T${n.trimestre}`,
@@ -242,6 +243,12 @@ export default function TeacherDashboard() {
                                     <p className="text-indigo-400 font-mono font-bold">{teacher.code_professeur}</p>
                                 </div>
                             )}
+                            <button
+                                onClick={() => navigate('/teacher/guide')}
+                                className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all text-xs font-bold border border-slate-700"
+                            >
+                                <Table className="w-4 h-4 text-indigo-400" /> Structure Excel
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
@@ -314,7 +321,7 @@ export default function TeacherDashboard() {
                                     ))}
                                 </select>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => { setModalType('selector'); setShowAddModal(true); }}
                                 className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-4 rounded-2xl shadow-lg shadow-indigo-600/20 transition-all"
                             >
@@ -357,21 +364,21 @@ export default function TeacherDashboard() {
                                         </td>
                                         <td className="px-8 py-6 text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <button 
+                                                <button
                                                     onClick={() => fetchEleveDetails(eleve)}
                                                     className="p-2 text-slate-500 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition-all"
                                                     title="Voir détails"
                                                 >
                                                     <ChevronRight className="w-5 h-5" />
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleOpenEdit(eleve)}
                                                     className="p-2 text-slate-500 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-all"
                                                     title="Changer classe"
                                                 >
                                                     <Settings className="w-5 h-5" />
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleDeleteEleve(eleve.id)}
                                                     className="p-2 text-slate-500 hover:text-rose-500 hover:bg-slate-800 rounded-lg transition-all"
                                                     title="Supprimer"
@@ -401,14 +408,14 @@ export default function TeacherDashboard() {
                             <div className="text-center">
                                 <h2 className="text-2xl font-bold text-white mb-8">Que souhaitez-vous ajouter ?</h2>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <button 
+                                    <button
                                         onClick={() => setModalType('class')}
                                         className="p-6 rounded-3xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex flex-col items-center gap-3 group"
                                     >
                                         <BookOpen className="w-8 h-8 text-amber-400 group-hover:scale-110 transition-transform" />
                                         <span className="font-bold text-sm">Une Classe</span>
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setModalType('eleve')}
                                         className="p-6 rounded-3xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex flex-col items-center gap-3 group"
                                     >
@@ -416,7 +423,7 @@ export default function TeacherDashboard() {
                                         <span className="font-bold text-sm">Un Élève</span>
                                     </button>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setShowAddModal(false)}
                                     className="mt-8 text-slate-500 hover:text-white font-bold text-sm transition-colors"
                                 >
@@ -429,20 +436,20 @@ export default function TeacherDashboard() {
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-bold text-white">Créer une classe</h2>
                                 <div className="space-y-4">
-                                    <input 
+                                    <input
                                         type="text"
                                         placeholder="Nom de la classe (ex: Terminale G1)"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                         value={newClassName}
                                         onChange={(e) => setNewClassName(e.target.value)}
                                     />
-                                    <button 
+                                    <button
                                         onClick={handleAddClass}
                                         className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all"
                                     >
                                         Créer la classe
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setModalType('selector')}
                                         className="w-full text-slate-500 hover:text-white font-bold text-sm"
                                     >
@@ -456,21 +463,21 @@ export default function TeacherDashboard() {
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-bold text-white">Ajouter un élève</h2>
                                 <div className="space-y-4">
-                                    <input 
+                                    <input
                                         type="text"
                                         placeholder="Nom de famille"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                         value={newEleveData.nom}
                                         onChange={(e) => setNewEleveData({ ...newEleveData, nom: e.target.value })}
                                     />
-                                    <input 
+                                    <input
                                         type="text"
                                         placeholder="Prénom"
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                         value={newEleveData.prenom}
                                         onChange={(e) => setNewEleveData({ ...newEleveData, prenom: e.target.value })}
                                     />
-                                    <select 
+                                    <select
                                         className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                         value={newEleveData.classe_id}
                                         onChange={(e) => setNewEleveData({ ...newEleveData, classe_id: e.target.value })}
@@ -480,13 +487,13 @@ export default function TeacherDashboard() {
                                             <option key={c.id} value={c.id}>{c.nom}</option>
                                         ))}
                                     </select>
-                                    <button 
+                                    <button
                                         onClick={handleAddEleve}
                                         className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all"
                                     >
                                         Ajouter l'élève
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setModalType('selector')}
                                         className="w-full text-slate-500 hover:text-white font-bold text-sm"
                                     >
@@ -517,7 +524,7 @@ export default function TeacherDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setShowDetailModal(false)}
                                 className="w-12 h-12 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-2xl transition-all"
                             >
@@ -549,7 +556,7 @@ export default function TeacherDashboard() {
                                                         className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${activeEleveTab === tab
                                                             ? 'bg-indigo-600 text-white'
                                                             : 'text-slate-500 hover:text-slate-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {tab}
                                                     </button>
@@ -603,8 +610,8 @@ export default function TeacherDashboard() {
                                                 {elevePlanning.length > 0 ? (
                                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 p-6">
                                                         {[
-                                                            'cond', 'rec', 'deriv', 'signe', 'sg', 'cv', 'python', 'lim', 
-                                                            'graph', 'conv', 'vect', 'dte', 'lim_fn', 'co', 'den', 'trigo', 
+                                                            'cond', 'rec', 'deriv', 'signe', 'sg', 'cv', 'python', 'lim',
+                                                            'graph', 'conv', 'vect', 'dte', 'lim_fn', 'co', 'den', 'trigo',
                                                             'plan', 'v', 'bino', 'integr', 'aire', 'int_plus', 'va', 'ed'
                                                         ].map((key) => {
                                                             const value = elevePlanning[0]?.[key];
@@ -647,7 +654,7 @@ export default function TeacherDashboard() {
                             </p>
                             <div className="space-y-4">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Choisir une nouvelle classe</label>
-                                <select 
+                                <select
                                     className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                     value={editClassId}
                                     onChange={(e) => setEditClassId(e.target.value)}
@@ -656,13 +663,13 @@ export default function TeacherDashboard() {
                                         <option key={c.id} value={c.id}>{c.nom}</option>
                                     ))}
                                 </select>
-                                <button 
+                                <button
                                     onClick={handleUpdateEleveClass}
                                     className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all"
                                 >
                                     Enregistrer le changement
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setShowEditModal(false)}
                                     className="w-full text-slate-500 hover:text-white font-bold text-sm"
                                 >
