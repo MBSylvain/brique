@@ -2,177 +2,232 @@ Option Explicit
 
 ' =========================================================================================
 ' CONFIGURATION SUPABASE
-' Remplacer ces valeurs par celles de votre projet Supabase (Paramètres > API)
 ' =========================================================================================
 Const SUPABASE_URL As String = "https://xciusxowoxlostxxpbjn.supabase.co"
-Const SUPABASE_KEY As String = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo"
+' Note : Le script utilise votre SERVICE_ROLE_KEY pour les maj (à garder secret)
+Const SUPABASE_KEY As String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaXVzeG93b3hsb3N0eHhwYmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODkxNTg3OCwiZXhwIjoyMDg0NDkxODc4fQ.b3Y5PKHKMD_fkHhE3KkMmZBuFDyVWoseLVIFn5RB6VQ"
+
+' Emplacement du code professeur : Cellule [H1] de l'onglet 'Eleves'
+' =========================================================================================
 
 ' =========================================================================================
-' MACRO PRINCIPALE A LIER AU BOUTON
+' MACRO PRINCIPALE
 ' =========================================================================================
 Sub SynchroniserOngletActif()
     Dim ws As Worksheet
     Set ws = ActiveSheet
     
-    Dim tableName As String
-    
-    ' Nettoyer le nom de l'onglet pour la comparaison (minuscules, sans accents simples)
     Dim cleanName As String
     cleanName = LCase(ws.Name)
     cleanName = Replace(cleanName, "é", "e")
-    cleanName = Replace(cleanName, "è", "e")
-    cleanName = Replace(cleanName, "ê", "e")
     
-    ' Détecter la table cible selon le nom de l'onglet
+    ' 1. Vérification du Code Professeur
+    Dim profCode As String
+    profCode = GetTeacherCode()
+    If profCode = "" Then Exit Sub
+    
+    ' 2. Détection du type d'onglet
     If InStr(cleanName, "planning") > 0 Then
-        tableName = "planning"
-        EnvoyerPlanning ws, tableName
-    ElseIf InStr(cleanName, "eleves t1") > 0 Then
-        tableName = "eleves"
-        EnvoyerNotes ws, tableName, "T1"
-    ElseIf InStr(cleanName, "eleves t2") > 0 Then
-        tableName = "eleves"
-        EnvoyerNotes ws, tableName, "T2"
-    ElseIf InStr(cleanName, "eleves t3") > 0 Then
-        tableName = "eleves"
-        EnvoyerNotes ws, tableName, "T3"
+        Call EnvoyerPlanning(ws, profCode)
+    ElseIf InStr(cleanName, "notes") > 0 Or (InStr(cleanName, "eleve") > 0 And InStr(cleanName, "t") > 0) Then
+        ' Détection du trimestre (T1, T2 ou T3)
+        Dim trim As Integer
+        If InStr(cleanName, "t1") > 0 Then trim = 1 Else If InStr(cleanName, "t2") > 0 Then trim = 2 Else If InStr(cleanName, "t3") > 0 Then trim = 3 Else trim = 0
+        
+        If trim > 0 Then
+            Call EnvoyerNotes(ws, trim, profCode)
+        Else
+            MsgBox "Pour les notes, l'onglet doit contenir T1, T2 ou T3 (ex: 'Notes T1').", vbExclamation
+        End If
+    ElseIf InStr(cleanName, "eleve") > 0 Then
+        ' Onglet de gestion globale (sans trimestre)
+        Call EnvoyerListeEleves(ws, profCode)
     Else
         MsgBox "L'onglet '" & ws.Name & "' n'est pas reconnu." & vbCrLf & _
-               "Noms attendus : 'Affichage-ib-planning', 'Affichage eleves T1', etc.", vbExclamation
+               "Noms valides : 'Planning', 'Notes T1/T2/T3', ou 'Eleve/Eleves'.", vbExclamation
     End If
 End Sub
 
 ' =========================================================================================
-' FONCTION D'ENVOI POUR LE PLANNING
+' ENVOI DU PLANNING
 ' =========================================================================================
-Sub EnvoyerPlanning(ws As Worksheet, tableName As String)
-    Dim lastRow As Long
-    Dim i As Long
+Sub EnvoyerPlanning(ws As Worksheet, profCode As String)
+    Dim lastRow As Long, i As Long
     Dim jsonBody As String
     Dim httpRequest As Object
-    
-    ' Trouver la dernière ligne
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
-    
-    ' Créer l'objet HTTP
     Set httpRequest = CreateObject("MSXML2.XMLHTTP")
     
-    ' Boucler sur les lignes de données (à partir de la ligne 3)
-    For i = 3 To lastRow
-        ' Construire le JSON par étapes pour éviter l'erreur de "nombre de caractères de continuité"
-        jsonBody = "{"
-        jsonBody = jsonBody & """cond"": """ & EscapeJson(ws.Cells(i, 1).Value) & """, "
-        jsonBody = jsonBody & """rec"": """ & EscapeJson(ws.Cells(i, 2).Value) & """, "
-        jsonBody = jsonBody & """deriv"": """ & EscapeJson(ws.Cells(i, 3).Value) & """, "
-        jsonBody = jsonBody & """signe"": """ & EscapeJson(ws.Cells(i, 4).Value) & """, "
-        jsonBody = jsonBody & """sg"": """ & EscapeJson(ws.Cells(i, 5).Value) & """, "
-        jsonBody = jsonBody & """cv"": """ & EscapeJson(ws.Cells(i, 6).Value) & """, "
-        jsonBody = jsonBody & """python"": """ & EscapeJson(ws.Cells(i, 7).Value) & """, "
-        jsonBody = jsonBody & """lim"": """ & EscapeJson(ws.Cells(i, 8).Value) & """, "
-        jsonBody = jsonBody & """graph"": """ & EscapeJson(ws.Cells(i, 9).Value) & """, "
-        jsonBody = jsonBody & """conv"": """ & EscapeJson(ws.Cells(i, 10).Value) & """, "
-        jsonBody = jsonBody & """vect"": """ & EscapeJson(ws.Cells(i, 11).Value) & """, "
-        jsonBody = jsonBody & """dte"": """ & EscapeJson(ws.Cells(i, 12).Value) & """, "
-        jsonBody = jsonBody & """lim_fn"": """ & EscapeJson(ws.Cells(i, 13).Value) & """, "
-        jsonBody = jsonBody & """co"": """ & EscapeJson(ws.Cells(i, 14).Value) & """, "
-        jsonBody = jsonBody & """den"": """ & EscapeJson(ws.Cells(i, 15).Value) & """, "
-        jsonBody = jsonBody & """trigo"": """ & EscapeJson(ws.Cells(i, 16).Value) & """, "
-        jsonBody = jsonBody & """plan"": """ & EscapeJson(ws.Cells(i, 17).Value) & """, "
-        jsonBody = jsonBody & """v"": """ & EscapeJson(ws.Cells(i, 18).Value) & """, "
-        jsonBody = jsonBody & """bino"": """ & EscapeJson(ws.Cells(i, 19).Value) & """, "
-        jsonBody = jsonBody & """integr"": """ & EscapeJson(ws.Cells(i, 20).Value) & """, "
-        jsonBody = jsonBody & """aire"": """ & EscapeJson(ws.Cells(i, 21).Value) & """, "
-        jsonBody = jsonBody & """int_plus"": """ & EscapeJson(ws.Cells(i, 22).Value) & """, "
-        jsonBody = jsonBody & """va"": """ & EscapeJson(ws.Cells(i, 23).Value) & """, "
-        jsonBody = jsonBody & """ed"": """ & EscapeJson(ws.Cells(i, 24).Value) & """ "
-        jsonBody = jsonBody & "}"
-        
-        ' Envoyer la requête
-        Call SendPostRequest(httpRequest, tableName, jsonBody)
-    Next i
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
     
+    For i = 3 To lastRow
+        If ws.Cells(i, 1).Value <> "" Then
+            jsonBody = "{"
+            jsonBody = jsonBody & """p_nom"": """ & EscapeJson(ws.Cells(i, 1).Value) & """, "
+            jsonBody = jsonBody & """p_prenom"": """ & EscapeJson(ws.Cells(i, 2).Value) & """, "
+            jsonBody = jsonBody & """p_code_professeur"": """ & profCode & """, "
+            jsonBody = jsonBody & """p_indicateurs"": {"
+            jsonBody = jsonBody & """cond"": """ & EscapeJson(ws.Cells(i, 3).Value) & """, "
+            jsonBody = jsonBody & """rec"": """ & EscapeJson(ws.Cells(i, 4).Value) & """, "
+            jsonBody = jsonBody & """deriv"": """ & EscapeJson(ws.Cells(i, 5).Value) & """, "
+            jsonBody = jsonBody & """signe"": """ & EscapeJson(ws.Cells(i, 6).Value) & """, "
+            jsonBody = jsonBody & """sg"": """ & EscapeJson(ws.Cells(i, 7).Value) & """, "
+            jsonBody = jsonBody & """cv"": """ & EscapeJson(ws.Cells(i, 8).Value) & """, "
+            jsonBody = jsonBody & """python"": """ & EscapeJson(ws.Cells(i, 9).Value) & """, "
+            jsonBody = jsonBody & """lim"": """ & EscapeJson(ws.Cells(i, 10).Value) & """, "
+            jsonBody = jsonBody & """graph"": """ & EscapeJson(ws.Cells(i, 11).Value) & """, "
+            jsonBody = jsonBody & """conv"": """ & EscapeJson(ws.Cells(i, 12).Value) & """, "
+            jsonBody = jsonBody & """vect"": """ & EscapeJson(ws.Cells(i, 13).Value) & """, "
+            jsonBody = jsonBody & """dte"": """ & EscapeJson(ws.Cells(i, 14).Value) & """, "
+            jsonBody = jsonBody & """lim_fn"": """ & EscapeJson(ws.Cells(i, 15).Value) & """, "
+            jsonBody = jsonBody & """co"": """ & EscapeJson(ws.Cells(i, 16).Value) & """, "
+            jsonBody = jsonBody & """den"": """ & EscapeJson(ws.Cells(i, 17).Value) & """, "
+            jsonBody = jsonBody & """trigo"": """ & EscapeJson(ws.Cells(i, 18).Value) & """, "
+            jsonBody = jsonBody & """plan"": """ & EscapeJson(ws.Cells(i, 19).Value) & """, "
+            jsonBody = jsonBody & """v"": """ & EscapeJson(ws.Cells(i, 20).Value) & """, "
+            jsonBody = jsonBody & """bino"": """ & EscapeJson(ws.Cells(i, 21).Value) & """, "
+            jsonBody = jsonBody & """integr"": """ & EscapeJson(ws.Cells(i, 22).Value) & """, "
+            jsonBody = jsonBody & """aire"": """ & EscapeJson(ws.Cells(i, 23).Value) & """, "
+            jsonBody = jsonBody & """int_plus"": """ & EscapeJson(ws.Cells(i, 24).Value) & """, "
+            jsonBody = jsonBody & """va"": """ & EscapeJson(ws.Cells(i, 25).Value) & """, "
+            jsonBody = jsonBody & """ed"": """ & EscapeJson(ws.Cells(i, 26).Value) & """"
+            jsonBody = jsonBody & "}"
+            jsonBody = jsonBody & "}"
+            
+            Call SendRpcRequest(httpRequest, "sync_planning_excel", jsonBody)
+        End If
+    Next i
     MsgBox "Export Planning terminé !", vbInformation
 End Sub
 
 ' =========================================================================================
-' FONCTION D'ENVOI POUR LES NOTES (ELEVES)
+' ENVOI DES NOTES
 ' =========================================================================================
-Sub EnvoyerNotes(ws As Worksheet, tableName As String, trimestre As String)
-    Dim lastRow As Long
-    Dim i As Long
+Sub EnvoyerNotes(ws As Worksheet, trim As Integer, profCode As String)
+    Dim lastRow As Long, i As Long
     Dim jsonBody As String
     Dim httpRequest As Object
-    
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
     Set httpRequest = CreateObject("MSXML2.XMLHTTP")
     
-    For i = 3 To lastRow
-        ' Convertir les valeurs numériques (remplacer virgule par point pour JSON)
-        ' Colonnes : 3=Moy, 4=QCM, 5=Reg, 6=BrIB, 7=Br+, 8=TotBr, 9=Appr, 10=DST, 11=BB, 12=MoyDST, 13=Code, 14=Classe, 15=Niveau
-        Dim moyenne As String: moyenne = Replace(ws.Cells(i, 3).Value, ",", ".")
-        Dim qcm As String: qcm = Replace(ws.Cells(i, 4).Value, ",", ".")
-        Dim regularite As String: regularite = Replace(ws.Cells(i, 5).Value, ",", ".")
-        Dim brique_ib As String: brique_ib = Replace(ws.Cells(i, 6).Value, ",", ".")
-        Dim brique_plus As String: brique_plus = Replace(ws.Cells(i, 7).Value, ",", ".")
-        Dim total_briques As String: total_briques = Replace(ws.Cells(i, 8).Value, ",", ".")
-        Dim apprentissage As String: apprentissage = Replace(ws.Cells(i, 9).Value, ",", ".")
-        Dim dst As String: dst = Replace(ws.Cells(i, 10).Value, ",", ".")
-        Dim bb As String: bb = Replace(ws.Cells(i, 11).Value, ",", ".")
-        Dim moy_dst As String: moy_dst = Replace(ws.Cells(i, 12).Value, ",", ".")
-        Dim code As String: code = ws.Cells(i, 13).Value
-        Dim classe As String: classe = ws.Cells(i, 14).Value
-        Dim niveau As String: niveau = ws.Cells(i, 15).Value
-        
-        jsonBody = "{"
-        jsonBody = jsonBody & """trimestre"": """ & trimestre & """, "
-        jsonBody = jsonBody & """nom"": """ & EscapeJson(ws.Cells(i, 1).Value) & """, "
-        jsonBody = jsonBody & """prenom"": """ & EscapeJson(ws.Cells(i, 2).Value) & """, "
-        jsonBody = jsonBody & """moyenne"": " & IIf(IsNumeric(moyenne) And moyenne <> "", moyenne, "null") & ", "
-        jsonBody = jsonBody & """qcm"": " & IIf(IsNumeric(qcm) And qcm <> "", qcm, "null") & ", "
-        jsonBody = jsonBody & """regularite"": " & IIf(IsNumeric(regularite) And regularite <> "", regularite, "null") & ", "
-        jsonBody = jsonBody & """brique_ib"": " & IIf(IsNumeric(brique_ib) And brique_ib <> "", brique_ib, "null") & ", "
-        jsonBody = jsonBody & """brique_plus"": " & IIf(IsNumeric(brique_plus) And brique_plus <> "", brique_plus, "null") & ", "
-        jsonBody = jsonBody & """total_briques"": " & IIf(IsNumeric(total_briques) And total_briques <> "", total_briques, "null") & ", "
-        jsonBody = jsonBody & """apprentissage"": " & IIf(IsNumeric(apprentissage) And apprentissage <> "", apprentissage, "null") & ", "
-        jsonBody = jsonBody & """dst"": " & IIf(IsNumeric(dst) And dst <> "", dst, "null") & ", "
-        jsonBody = jsonBody & """bb"": " & IIf(IsNumeric(bb) And bb <> "", bb, "null") & ", "
-        jsonBody = jsonBody & """moy_dst"": " & IIf(IsNumeric(moy_dst) And moy_dst <> "", moy_dst, "null") & ", "
-        jsonBody = jsonBody & """code"": """ & EscapeJson(code) & """, "
-        jsonBody = jsonBody & """classe"": """ & EscapeJson(classe) & """, "
-        jsonBody = jsonBody & """niveau"": """ & EscapeJson(niveau) & """ "
-        jsonBody = jsonBody & "}"
-        
-        Call SendPostRequest(httpRequest, tableName, jsonBody)
-    Next i
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
     
-    MsgBox "Export Notes (" & trimestre & ") terminé !", vbInformation
+    For i = 3 To lastRow
+        If ws.Cells(i, 1).Value <> "" Then
+            jsonBody = "{"
+            jsonBody = jsonBody & """p_nom"": """ & EscapeJson(ws.Cells(i, 1).Value) & """, "
+            jsonBody = jsonBody & """p_prenom"": """ & EscapeJson(ws.Cells(i, 2).Value) & """, "
+            jsonBody = jsonBody & """p_trimestre"": " & trim & ", "
+            jsonBody = jsonBody & """p_code_professeur"": """ & profCode & """, "
+            jsonBody = jsonBody & """p_donnees"": {"
+            jsonBody = jsonBody & """moyenne"": " & ToNum(ws.Cells(i, 3).Value) & ", "
+            jsonBody = jsonBody & """qcm"": " & ToNum(ws.Cells(i, 4).Value) & ", "
+            jsonBody = jsonBody & """regularite"": " & ToNum(ws.Cells(i, 5).Value) & ", "
+            jsonBody = jsonBody & """brique_ib"": " & ToNum(ws.Cells(i, 6).Value) & ", "
+            jsonBody = jsonBody & """brique_plus"": " & ToNum(ws.Cells(i, 7).Value) & ", "
+            jsonBody = jsonBody & """total_briques"": " & ToNum(ws.Cells(i, 8).Value) & ", "
+            jsonBody = jsonBody & """apprentissage"": " & ToNum(ws.Cells(i, 9).Value) & ", "
+            jsonBody = jsonBody & """dst"": " & ToNum(ws.Cells(i, 10).Value) & ", "
+            jsonBody = jsonBody & """bb"": " & ToNum(ws.Cells(i, 11).Value) & ", "
+            jsonBody = jsonBody & """classe"": """ & EscapeJson(ws.Cells(i, 12).Value) & """"
+            jsonBody = jsonBody & "}"
+            jsonBody = jsonBody & "}"
+            
+            Call SendRpcRequest(httpRequest, "sync_notes_excel", jsonBody)
+        End If
+    Next i
+    MsgBox "Export Notes (T" & trim & ") terminé !", vbInformation
 End Sub
 
 ' =========================================================================================
-' UTILITAIRES
+' GESTION DES ELEVES (Création automatique et récupération des codes)
 ' =========================================================================================
-Sub SendPostRequest(httpRequest As Object, tableName As String, jsonBody As String)
+Sub EnvoyerListeEleves(ws As Worksheet, profCode As String)
+    Dim lastRow As Long, i As Long
+    Dim jsonBody As String
+    Dim httpRequest As Object
+    Set httpRequest = CreateObject("MSXML2.XMLHTTP")
+    
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 3 To lastRow
+        If ws.Cells(i, 1).Value <> "" Then
+            jsonBody = "{"
+            jsonBody = jsonBody & """p_nom"": """ & EscapeJson(ws.Cells(i, 1).Value) & """, "
+            jsonBody = jsonBody & """p_prenom"": """ & EscapeJson(ws.Cells(i, 2).Value) & """, "
+            jsonBody = jsonBody & """p_classe_nom"": """ & EscapeJson(ws.Cells(i, 3).Value) & """, "
+            jsonBody = jsonBody & """p_niveau"": """ & EscapeJson(ws.Cells(i, 4).Value) & """, "
+            jsonBody = jsonBody & """p_code_professeur"": """ & profCode & """"
+            jsonBody = jsonBody & "}"
+            
+            Dim response As String
+            response = SendRpcWithResponse(httpRequest, "sync_eleves_liste_excel", jsonBody)
+            
+            If response <> "" Then
+                ws.Cells(i, 5).Value = Replace(response, """", "") ' Remplir le Code Secret
+            End If
+        End If
+    Next i
+    MsgBox "Synchronisation de la liste des élèves terminée !", vbInformation
+End Sub
+
+' =========================================================================================
+' UTILITAIRES Réseau
+' =========================================================================================
+Sub SendRpcRequest(httpRequest As Object, funcName As String, jsonBody As String)
+    Call SendRpcWithResponse(httpRequest, funcName, jsonBody)
+End Sub
+
+Function SendRpcWithResponse(httpRequest As Object, funcName As String, jsonBody As String) As String
     Dim url As String
-    url = SUPABASE_URL & "/rest/v1/" & tableName
+    url = SUPABASE_URL & "/rest/v1/rpc/" & funcName
     
     With httpRequest
         .Open "POST", url, False
         .setRequestHeader "Content-Type", "application/json"
         .setRequestHeader "apikey", SUPABASE_KEY
         .setRequestHeader "Authorization", "Bearer " & SUPABASE_KEY
-        .setRequestHeader "Prefer", "return=minimal" ' Pour ne pas attendre de réponse lourde
         .send jsonBody
+        
+        If .Status >= 400 Then
+            Debug.Print "Erreur RPC (" & funcName & "): " & .responseText
+            SendRpcWithResponse = ""
+        Else
+            SendRpcWithResponse = .responseText
+        End If
     End With
+End Function
+
+Function GetTeacherCode() As String
+    On Error Resume Next
+    Dim code As String
     
-    If httpRequest.Status >= 400 Then
-        Debug.Print "Erreur : " & httpRequest.responseText
+    ' Essaye 'Eleves' puis 'Eleve'
+    code = Sheets("Eleves").Range("H1").Value
+    If code = "" Then code = Sheets("Eleve").Range("H1").Value
+    
+    ' Si on est déjà sur l'onglet, essayer aussi la cellule H1 de la feuille active
+    If code = "" And InStr(LCase(ActiveSheet.Name), "eleve") > 0 Then
+        code = ActiveSheet.Range("H1").Value
     End If
-End Sub
+    On Error GoTo 0
+    
+    If code = "" Then
+        MsgBox "ERREUR : Le Code Professeur est absent de la cellule [H1] de l'onglet 'Eleves' ou 'Eleve'.", vbCritical
+        GetTeacherCode = ""
+    Else
+        GetTeacherCode = code
+    End If
+End Function
+
+Function ToNum(val As Variant) As String
+    If IsNumeric(val) And val <> "" Then
+        ToNum = Replace(CStr(val), ",", ".")
+    Else
+        ToNum = "null"
+    End If
+End Function
 
 Function EscapeJson(ByVal txt As Variant) As String
-    If IsError(txt) Then EscapeJson = "": Exit Function
-    If IsNull(txt) Then EscapeJson = "": Exit Function
-    
+    If IsError(txt) Or IsNull(txt) Then EscapeJson = "": Exit Function
     Dim tmp As String
     tmp = CStr(txt)
     tmp = Replace(tmp, "\", "\\")

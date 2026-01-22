@@ -25,24 +25,32 @@ export default function Dashboard() {
   async function fetchData(userData) {
     setLoading(true)
     try {
-      // Récupérer les notes de l'élève
+      // 1. Récupérer les notes de l'élève (plusieurs trimestres possibles)
       const { data: notesData, error: notesError } = await supabase
-        .from('eleves')
+        .from('notes')
         .select('*')
-        .eq('nom', userData.nom)
-        .eq('prenom', userData.prenom)
+        .eq('eleve_id', userData.id)
 
       if (notesError) throw notesError
-      setNotes(notesData || [])
+      
+      // Transformer le JSONB 'donnees' pour l'affichage à plat si nécessaire
+      const flattenedNotes = notesData?.map(n => ({
+        ...n.donnees,
+        trimestre: `T${n.trimestre}`,
+        id: n.id
+      })) || []
+      
+      setNotes(flattenedNotes)
 
-      // Récupérer le planning
+      // 2. Récupérer le planning
       const { data: planningData, error: planningError } = await supabase
         .from('planning')
         .select('*')
-        .order('id', { ascending: true })
+        .eq('eleve_id', userData.id)
+        .single() // Un seul planning par élève
 
-      if (planningError) throw planningError
-      setPlanning(planningData || [])
+      if (planningError && planningError.code !== 'PGRST116') throw planningError
+      setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : [])
 
     } catch (error) {
       console.error('Erreur lors de la récupération des données:', error)
@@ -159,6 +167,8 @@ export default function Dashboard() {
                     { label: 'Régularité', value: currentNotes.regularite, icon: '📅' },
                     { label: 'Brique IB', value: currentNotes.brique_ib, icon: '🧱' },
                     { label: 'Brique +', value: currentNotes.brique_plus, icon: '➕' },
+                    { label: 'Total Briques', value: currentNotes.total_briques, icon: '🧱' },
+                    { label: 'Apprentissage', value: currentNotes.apprentissage, icon: '💡' },
                     { label: 'DST', value: currentNotes.dst, icon: '📝' },
                     { label: 'Bac Blanc', value: currentNotes.bb, icon: '🎓' },
                     { label: 'Moyenne DST', value: currentNotes.moy_dst, icon: '🏆' },
@@ -196,18 +206,23 @@ export default function Dashboard() {
 
                 <div className="divide-y divide-slate-50">
                   {planning.length > 0 ? (
-                    planning.map((row, idx) => (
-                      Object.entries(row).map(([key, value]) => {
-                        if (['id', 'eleve', 'created_at'].includes(key)) return null;
-                        if (!value) return null;
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 p-8">
+                      {[
+                        'cond', 'rec', 'deriv', 'signe', 'sg', 'cv', 'python', 'lim', 
+                        'graph', 'conv', 'vect', 'dte', 'lim_fn', 'co', 'den', 'trigo', 
+                        'plan', 'v', 'bino', 'integr', 'aire', 'int_plus', 'va', 'ed'
+                      ].map((key) => {
+                        const value = planning[0]?.[key];
                         return (
-                          <div key={`${idx}-${key}`} className="p-5 hover:bg-slate-50/50 transition-colors group">
-                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">{key}</p>
-                            <p className="text-sm font-bold text-slate-700 group-hover:text-slate-900 transition-colors">{value}</p>
+                          <div key={key} className="flex flex-col gap-1.5 group">
+                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">{key}</p>
+                            <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                              {value || <span className="text-slate-300">--</span>}
+                            </p>
                           </div>
                         );
-                      })
-                    ))
+                      })}
+                    </div>
                   ) : (
                     <div className="p-10 text-center">
                       <Calendar className="w-10 h-10 text-slate-200 mx-auto mb-3" />

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { User, Lock, ArrowRight, Loader2, GraduationCap } from 'lucide-react'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [formData, setFormData] = useState({ nom: '', code: '' })
+  const [formData, setFormData] = useState({ nom: '', prenom: '', code: '', email: '', password: '' })
   const [role, setRole] = useState('eleve') // 'eleve' or 'staff'
   const navigate = useNavigate()
 
@@ -17,13 +17,12 @@ export default function Login() {
 
     try {
       if (role === 'eleve') {
-        // Rechercher l'élève dans la table avec Nom + Code
-        const { data, error } = await supabase
-          .from('eleves')
-          .select('*')
-          .ilike('nom', formData.nom.trim())
-          .eq('code', formData.code.trim())
-          .limit(1)
+        // Valider via RPC
+        const { data, error } = await supabase.rpc('login_eleve', {
+          p_nom: formData.nom.trim(),
+          p_prenom: formData.prenom.trim(),
+          p_code: formData.code.trim()
+        })
 
         if (error) throw error
 
@@ -32,36 +31,61 @@ export default function Login() {
           localStorage.setItem('eleve_data', JSON.stringify(data[0]))
           navigate('/dashboard')
         } else {
-          setError('Nom ou Code incorrect.')
+          setError('Identifiants élève incorrects (Nom, Prénom ou Code).')
         }
       } else {
-        // Rechercher dans la table staff
-        const { data, error } = await supabase
-          .from('staff')
-          .select('*')
-          .ilike('nom', formData.nom.trim())
-          .eq('code', formData.code.trim())
-          .limit(1)
+        // Authentification Supabase Auth pour le staff
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+        })
 
         if (error) throw error
 
-        if (data && data.length > 0) {
-          const user = data[0]
-          localStorage.setItem('user_type', 'staff')
-          localStorage.setItem('staff_data', JSON.stringify(user))
+        if (data.user) {
+          // Récupérer le profil pour le rôle
+          const { data: profs, error: profError } = await supabase
+            .from('professeurs')
+            .select('*')
+            .eq('id', data.user.id)
 
-          if (user.role === 'admin') {
-            navigate('/admin')
-          } else {
+          if (profError) throw profError
+
+          if (profs && profs.length > 0) {
+            localStorage.setItem('user_type', 'teacher')
+            localStorage.setItem('staff_data', JSON.stringify(profs[0]))
             navigate('/teacher')
+          } else {
+            // FALLBACK: Si le profil est manquant, on essaie de le créer à la volée
+            const codeProf = Math.random().toString(36).substring(2, 10).toUpperCase()
+            const { data: newProf, error: createError } = await supabase
+              .from('professeurs')
+              .insert([
+                {
+                  id: data.user.id,
+                  email: data.user.email,
+                  nom: data.user.user_metadata?.nom || 'Nom',
+                  prenom: data.user.user_metadata?.prenom || 'Prénom',
+                  code_professeur: codeProf
+                }
+              ])
+              .select()
+              .single()
+
+            if (!createError && newProf) {
+              localStorage.setItem('user_type', 'teacher')
+              localStorage.setItem('staff_data', JSON.stringify(newProf))
+              navigate('/teacher')
+            } else {
+              setError("Votre profil de professeur n'a pas pu être initialisé. Veuillez contacter l'administrateur.")
+              await supabase.auth.signOut()
+            }
           }
-        } else {
-          setError('Identifiants staff incorrects.')
         }
       }
     } catch (err) {
       console.error(err)
-      setError('Erreur de connexion.')
+      setError(err.message || 'Erreur de connexion.')
     } finally {
       setLoading(false)
     }
@@ -99,45 +123,96 @@ export default function Login() {
                 onClick={() => setRole('staff')}
                 className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${role === 'staff' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
               >
-                Espace Staff
+                Professeur
               </button>
             </div>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-300 ml-1">Nom de famille</label>
-              <div className="group relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
-                <input
-                  type="text"
-                  required
-                  placeholder="Ex: Dupont"
-                  className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg"
-                  value={formData.nom}
-                  onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
-                />
-              </div>
-            </div>
+            {role === 'eleve' ? (
+              <>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-slate-300 ml-1">Nom de famille</label>
+                  <div className="group relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Dupont"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg"
+                      value={formData.nom}
+                      onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-300 ml-1">Code Secret</label>
-              <div className="group relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••"
-                  className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg tracking-[0.5em]"
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                />
-              </div>
-            </div>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-slate-300 ml-1">Prénom</label>
+                  <div className="group relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: Jean"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg"
+                      value={formData.prenom}
+                      onChange={(e) => setFormData({ ...formData, prenom: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-slate-300 ml-1">Code Secret</label>
+                  <div className="group relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg tracking-[0.5em]"
+                      value={formData.code}
+                      onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-slate-300 ml-1">Email</label>
+                  <div className="group relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="prof@ecole.com"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-semibold text-slate-300 ml-1">Mot de passe</label>
+                  <div className="group relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-lg"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             {error && (
               <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium flex items-center gap-3 animate-shake">
-                <span className="text-lg">⚠️</span> {error}
+                <span className="text-lg">⚠️</span> {error} 
               </div>
             )}
 
@@ -159,6 +234,14 @@ export default function Login() {
               </span>
             </button>
           </form>
+
+          {role === 'staff' && (
+            <div className="mt-6 text-center">
+              <Link to="/signup" className="text-indigo-400 text-sm hover:underline font-medium">
+                Pas encore de compte ? S'inscrire
+              </Link>
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
