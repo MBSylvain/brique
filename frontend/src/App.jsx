@@ -4,6 +4,7 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import TeacherDashboard from './pages/TeacherDashboard'
+import GuideStructure from './pages/GuideStructure'
 
 function App() {
   const ProtectedRoute = ({ children, allowedType }) => {
@@ -16,11 +17,12 @@ function App() {
     if (allowedType && userType !== allowedType) {
       // Logic for staff role sub-types
       if (userType === 'staff' || userType === 'teacher') {
-        const staffData = JSON.parse(localStorage.getItem('staff_data'))
+        const staffDataRaw = localStorage.getItem('staff_data')
+        const staffData = staffDataRaw ? JSON.parse(staffDataRaw) : {}
         // Pour les professeurs
         if (allowedType === 'teacher') return children
         // Pour les admins
-        if (allowedType === 'admin' && staffData.role !== 'admin') return <Navigate to="/" replace />
+        if (allowedType === 'admin' && staffData?.role !== 'admin') return <Navigate to="/" replace />
       } else if (allowedType !== 'eleve') {
         return <Navigate to="/" replace />
       }
@@ -55,6 +57,14 @@ function App() {
           element={
             <ProtectedRoute allowedType="teacher">
               <TeacherDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/guide"
+          element={
+            <ProtectedRoute allowedType="teacher">
+              <GuideStructure />
             </ProtectedRoute>
           }
         />
