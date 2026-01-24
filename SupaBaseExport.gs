@@ -10,39 +10,29 @@ const SUPABASE_KEY = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo";
 // =========================================================================================
 function SynchroniserOngletActif() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  let cleanName = sheet.getName().toLowerCase().replace("é", "e");
+  const sheetName = sheet.getName();
 
   // 1. Vérification du Code Professeur
   const profCode = GetTeacherCode();
   if (!profCode) return;
 
-  // 2. Détection du type d'onglet
-  if (cleanName.includes("planning")) {
+  // 2. Détection du type d'onglet selon les nouveaux noms
+  if (sheetName === "Révision-IB") {
     EnvoyerPlanning(sheet, profCode);
-  } else if (
-    cleanName.includes("notes") ||
-    (cleanName.includes("eleve") && cleanName.includes("t"))
-  ) {
-    // Détection du trimestre (T1, T2 ou T3)
+  } else if (["T1", "T2", "T3"].includes(sheetName)) {
+    // Détection du trimestre selon le nom exact de l'onglet
     let trim = 0;
-    if (cleanName.includes("t1")) trim = 1;
-    else if (cleanName.includes("t2")) trim = 2;
-    else if (cleanName.includes("t3")) trim = 3;
-
-    if (trim > 0) {
-      EnvoyerNotes(sheet, trim, profCode);
-    } else {
-      SpreadsheetApp.getUi().alert(
-        "Pour les notes, l'onglet doit contenir T1, T2 ou T3 (ex: 'Notes T1')."
-      );
-    }
-  } else if (cleanName.includes("eleve")) {
+    if (sheetName === "T1") trim = 1;
+    else if (sheetName === "T2") trim = 2;
+    else if (sheetName === "T3") trim = 3;
+    EnvoyerNotes(sheet, trim, profCode);
+  } else if (sheetName.toLowerCase().includes("eleve")) {
     EnvoyerListeEleves(sheet, profCode);
   } else {
     SpreadsheetApp.getUi().alert(
       "L'onglet '" +
-        sheet.getName() +
-        "' n'est pas reconnu.\nNoms valides : 'Planning', 'Notes T1/T2/T3', ou 'Eleve/Eleves'."
+        sheetName +
+        "' n'est pas reconnu.\nNoms valides : 'Révision-IB', 'T1', 'T2', 'T3', ou 'Eleve/Eleves'."
     );
   }
 }
@@ -216,7 +206,7 @@ function EscapeJson(txt) {
   if (txt === null || txt === undefined) return "";
   let tmp = String(txt);
   tmp = tmp.replace(/\\/g, "\\\\");
-  tmp = tmp.replace(/"/g, '\\"');
+  tmp = tmp.replace(/"/g, "\\\"");
   tmp = tmp.replace(/\r\n|\r|\n/g, "\\n");
   return tmp;
 }
