@@ -5,7 +5,7 @@ Option Explicit
 ' =========================================================================================
 Const SUPABASE_URL As String = "https://xciusxowoxlostxxpbjn.supabase.co"
 ' Note : Le script utilise votre SERVICE_ROLE_KEY pour les maj (à garder secret)
-Const SUPABASE_KEY As String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaXVzeG93b3hsb3N0eHhwYmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODkxNTg3OCwiZXhwIjoyMDg0NDkxODc4fQ.b3Y5PKHKMD_fkHhE3KkMmZBuFDyVWoseLVIFn5RB6VQ"
+Const SUPABASE_KEY As String = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo"
 
 ' Emplacement du code professeur : Cellule [H1] de l'onglet 'Eleves'
 ' =========================================================================================

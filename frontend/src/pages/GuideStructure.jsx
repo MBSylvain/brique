@@ -4,58 +4,15 @@ import { ArrowLeft, Table, List, Calendar, Info, HelpCircle, Copy, Check, Code }
 //guide structure
 export default function GuideStructure() {
     const navigate = useNavigate()
-    const [copied, setCopied] = useState(false)
-
-    const vbaCode = `Option Explicit
-
-' =========================================================================================
-' CONFIGURATION SUPABASE
-' =========================================================================================
-Const SUPABASE_URL As String = "https://xciusxowoxlostxxpbjn.supabase.co"
-Const SUPABASE_KEY As String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaXVzeG93b3hsb3N0eHhwYmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODkxNTg3OCwiZXhwIjoyMDg0NDkxODc4fQ.b3Y5PKHKMD_fkHhE3KkMmZBuFDyVWoseLVIFn5RB6VQ"
-
-' =========================================================================================
-' MACRO PRINCIPALE
-' =========================================================================================
-Sub SynchroniserOngletActif()
-    Dim ws As Worksheet
-    Set ws = ActiveSheet
-    
-    Dim cleanName As String
-    cleanName = LCase(ws.Name)
-    cleanName = Replace(cleanName, "é", "e")
-    
-    Dim profCode As String
-    profCode = GetTeacherCode()
-    If profCode = "" Then Exit Sub
-    
-    If InStr(cleanName, "planning") > 0 Then
-        Call EnvoyerPlanning(ws, profCode)
-    ElseIf InStr(cleanName, "notes") > 0 Or (InStr(cleanName, "eleve") > 0 And InStr(cleanName, "t") > 0) Then
-        Dim trim As Integer
-        If InStr(cleanName, "t1") > 0 Then trim = 1 Else If InStr(cleanName, "t2") > 0 Then trim = 2 Else If InStr(cleanName, "t3") > 0 Then trim = 3 Else trim = 0
-        
-        If trim > 0 Then
-            Call EnvoyerNotes(ws, trim, profCode)
-        Else
-            MsgBox "L'onglet doit contenir T1, T2 ou T3 (ex: 'Notes T1').", vbExclamation
-        End If
-    ElseIf InStr(cleanName, "eleve") > 0 Then
-        Call EnvoyerListeEleves(ws, profCode)
-    Else
-        MsgBox "Onglet non reconnu.", vbExclamation
-    End If
-End Sub
-
-' ... [Code complet disponible ci-dessous] ...`;
-
-    const googesheetcode = `
+    const [copied, setCopied] = useState(null)
+    // ...existing code...
+    const googlesheetcode = `
 // =========================================================================================
 // CONFIGURATION SUPABASE
 // =========================================================================================
 const SUPABASE_URL = "https://xciusxowoxlostxxpbjn.supabase.co";
 // Note : Le script utilise votre SERVICE_ROLE_KEY pour les maj (à garder secret)
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaXVzeG93b3hsb3N0eHhwYmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODkxNTg3OCwiZXhwIjoyMDg0NDkxODc4fQ.b3Y5PKHKMD_fkHhE3KkMmZBuFDyVWoseLVIFn5RB6VQ";
+const SUPABASE_KEY = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo";
 
 // =========================================================================================
 // MACRO PRINCIPALE
@@ -280,7 +237,7 @@ function EscapeJson(txt) {
 ' CONFIGURATION SUPABASE
 ' =========================================================================================
 Const SUPABASE_URL As String = "https://xciusxowoxlostxxpbjn.supabase.co"
-Const SUPABASE_KEY As String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaXVzeG93b3hsb3N0eHhwYmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODkxNTg3OCwiZXhwIjoyMDg0NDkxODc4fQ.b3Y5PKHKMD_fkHhE3KkMmZBuFDyVWoseLVIFn5RB6VQ"
+Const SUPABASE_KEY As String = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo"
 
 Sub SynchroniserOngletActif()
     Dim ws As Worksheet
@@ -447,9 +404,16 @@ End Function`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(fullVbaCode)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+        setCopied('vba')
+        setTimeout(() => setCopied(null), 2000)
     }
+
+    const handleCopyGs = () => {
+        navigator.clipboard.writeText(googlesheetcode)
+        setCopied('gs')
+        setTimeout(() => setCopied(null), 2000)
+    }
+
 
     const sections = [
         {
@@ -509,7 +473,7 @@ End Function`;
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> Retour au Dashboard
                         </button>
                         <h1 className="text-5xl font-black tracking-tight leading-tight">
-                            Structure du <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">Fichier Excel</span>
+                            Structure du <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-blue-400">Fichier Excel</span>
                         </h1>
                         <p className="text-slate-300 text-lg mt-4 max-w-2xl font-medium">
                             Pour garantir une synchronisation sans erreur, veuillez respecter scrupuleusement l'ordre et le contenu des colonnes ci-dessous.
@@ -612,7 +576,7 @@ End Function`;
                                     onClick={handleCopy}
                                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-indigo-600/20"
                                 >
-                                    {copied ? <><Check className="w-4 h-4" /> Copié !</> : <><Copy className="w-4 h-4" /> Copier le code</>}
+                                    {copied === 'vba' ? <><Check className="w-4 h-4" /> Copié !</> : <><Copy className="w-4 h-4" /> Copier le code</>}
                                 </button>
                             </div>
                             <div className="p-8 max-h-[500px] overflow-y-auto custom-scrollbar font-mono text-sm leading-relaxed bg-[#020617]/50">
@@ -638,6 +602,65 @@ End Function`;
                             </div>
                         </div>
                     </section>
+                    {/* New Section: Script Google sheet */}
+                    <section className="relative scroll-mt-24" id="vba-code">
+                        <div className="flex items-center gap-6 mb-8 px-4">
+                            <div className="p-4 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl">
+                                <Code className="w-6 h-6 text-indigo-400" />
+                            </div>
+                            <div>
+                                <h2 className="text-3xl font-black text-white tracking-tight">Script Google Sheet Complet</h2>
+                                <p className="text-slate-400 font-medium">Copiez ce code dans un module Extension Google Sheet .</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl group">
+                            <div className="flex items-center justify-between px-8 py-4 bg-slate-800/50 border-b border-white/5">
+                                <div className="flex gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-amber-500/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                                </div>
+                                <button
+                                    onClick={handleCopyGs}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-indigo-600/20"
+                                >
+                                    {copied === 'gs' ? <><Check className="w-4 h-4" /> Copié !</> : <><Copy className="w-4 h-4" /> Copier le code</>}
+                                </button>
+                            </div>
+                            <div className="p-8 max-h-[500px] overflow-y-auto custom-scrollbar font-mono text-sm leading-relaxed bg-[#020617]/50">
+                                <pre className="text-indigo-200/90 whitespace-pre">
+                                    {googlesheetcode}
+                                </pre>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 mx-4 p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl flex items-start gap-4">
+                            <div className="p-2 bg-indigo-500/20 rounded-xl">
+                                <Info className="text-indigo-400 w-6 h-6" />
+                            </div>
+                            <div className="text-indigo-200/90 text-sm font-medium space-y-2">
+                                <p className="font-bold text-white">Méthodologie d'installation des macros Google Sheet :</p>
+                                <ol className="list-decimal list-inside space-y-1">
+                                    <li>Ouvre ton Google Sheet.</li>
+                                    <li>Menu <b>Extensions</b> &rarr; <b>Apps Script</b>.</li>
+                                    <li>Supprime tout code existant si besoin, puis colle le script fourni dans l’éditeur Apps Script.</li>
+                                    <li>Enregistre le projet (icône disquette ou <b>Ctrl+S</b>).</li>
+                                    <li>Ferme l’éditeur Apps Script.</li>
+                                    <li>Pour lancer la macro, retourne sur ton Google Sheet, puis :<br/>
+                                        - Menu <b>Extensions</b> &rarr; <b>Macros</b> &rarr; <b>Importer une macro</b>.<br/>
+                                        - Sélectionne <b>SynchroniserOngletActif</b> et clique sur <b>Ajouter une fonction</b>.<br/>
+                                        - Menu <b>Extensions</b> &rarr; <b>Macros</b> &rarr; <b>SynchroniserOngletActif</b> pour exécuter la macro.
+                                    </li>
+                                    <li>La première exécution demandera d’autoriser le script (suis les instructions Google pour accorder les droits nécessaires).</li>
+                                </ol>
+                                <p className="mt-2 text-indigo-300">Astuce : tu peux aussi créer un bouton personnalisé dans ta feuille et lui associer la fonction <b>SynchroniserOngletActif</b> !</p>
+                            </div>
+                        </div>
+                    </section>
+
+
+
                 </div>
 
                 {/* Footer */}
