@@ -14,6 +14,12 @@ Const SUPABASE_KEY As String = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo"
 ' MACRO PRINCIPALE
 ' =========================================================================================
 Sub SynchroniserOngletActif()
+    ' ==============================
+    ' Personnalisation des noms d'onglets détectés :
+    ' - Modifie les conditions If/InStr ci-dessous pour ajouter ou changer les noms d'onglets reconnus.
+    '   Exemple : If InStr(cleanName, "mononglet") > 0 Then ...
+    ' - Pour les onglets de notes, adapte la détection du trimestre (T1, T2, T3) selon tes besoins.
+    ' ==============================
     Dim ws As Worksheet
     Set ws = ActiveSheet
     
@@ -52,6 +58,11 @@ End Sub
 ' ENVOI DU PLANNING
 ' =========================================================================================
 Sub EnvoyerPlanning(ws As Worksheet, profCode As String)
+    ' ==============================
+    ' Personnalisation des colonnes traitées pour l''onglet Planning :
+    ' - Adapte les indices ws.Cells(i, X) pour correspondre à la structure de ton onglet (A=1, B=2, ...).
+    ' - Ajoute, retire ou adapte les champs du jsonBody selon les colonnes présentes dans ta feuille.
+    ' ==============================
     Dim lastRow As Long, i As Long
     Dim jsonBody As String
     Dim httpRequest As Object
@@ -103,6 +114,11 @@ End Sub
 ' ENVOI DES NOTES
 ' =========================================================================================
 Sub EnvoyerNotes(ws As Worksheet, trim As Integer, profCode As String)
+    ' ==============================
+    ' Personnalisation des colonnes traitées pour les onglets de notes :
+    ' - Adapte les indices ws.Cells(i, X) pour correspondre à la structure de ton onglet (A=1, B=2, ...).
+    ' - Ajoute, retire ou adapte les champs du jsonBody selon les colonnes présentes dans ta feuille de notes.
+    ' ==============================
     Dim lastRow As Long, i As Long
     Dim jsonBody As String
     Dim httpRequest As Object
@@ -141,6 +157,11 @@ End Sub
 ' GESTION DES ELEVES (Création automatique et récupération des codes)
 ' =========================================================================================
 Sub EnvoyerListeEleves(ws As Worksheet, profCode As String)
+    ' ==============================
+    ' Personnalisation des colonnes traitées pour l''onglet Eleves :
+    ' - Adapte les indices ws.Cells(i, X) pour correspondre à la structure de ton onglet (A=1, B=2, ...).
+    ' - Ajoute, retire ou adapte les champs du jsonBody selon les colonnes présentes dans ta feuille Eleves.
+    ' ==============================
     Dim lastRow As Long, i As Long
     Dim jsonBody As String
     Dim httpRequest As Object

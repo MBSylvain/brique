@@ -8,6 +8,17 @@ const SUPABASE_KEY = "sb_publishable_118MNXAMxwEwlO5U6foShg_2bE3hufo";
 // =========================================================================================
 // MACRO PRINCIPALE
 // =========================================================================================
+/**
+ * Personnalisation des noms d'onglets détectés :
+ * - Modifie la condition sur sheetName ci-dessous pour ajouter ou changer les noms d'onglets reconnus.
+ *   Exemple : if (sheetName === "MonPlanning") { ... }
+ * - Pour les onglets de notes, ajoute ou remplace les valeurs dans le tableau ["T1", "T2", "T3"]
+ *
+ * Personnalisation des colonnes traitées :
+ * - Dans chaque fonction (EnvoyerPlanning, EnvoyerNotes, EnvoyerListeEleves), adapte les indices de colonnes (data[i][X])
+ *   pour correspondre à la structure de tes onglets (A=0, B=1, C=2, etc.).
+ * - Tu peux aussi ajouter/supprimer des champs dans les objets jsonBody selon tes besoins.
+ */
 function SynchroniserOngletActif() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const sheetName = sheet.getName();
@@ -16,23 +27,25 @@ function SynchroniserOngletActif() {
   const profCode = GetTeacherCode();
   if (!profCode) return;
 
-  // 2. Détection du type d'onglet selon les nouveaux noms
-  if (sheetName === "Révision-IB") {
+  // 2. Détection du type d'onglet selon les noms personnalisés
+  // Personnalise ici les noms d'onglets reconnus :
+  if (sheetName === "Révisions-IB") {
     EnvoyerPlanning(sheet, profCode);
   } else if (["T1", "T2", "T3"].includes(sheetName)) {
-    // Détection du trimestre selon le nom exact de l'onglet
+    // Ajoute ici d'autres noms d'onglets de notes si besoin
     let trim = 0;
     if (sheetName === "T1") trim = 1;
     else if (sheetName === "T2") trim = 2;
     else if (sheetName === "T3") trim = 3;
     EnvoyerNotes(sheet, trim, profCode);
   } else if (sheetName.toLowerCase().includes("eleve")) {
+    // Tu peux remplacer "eleve" par un autre mot-clé si besoin
     EnvoyerListeEleves(sheet, profCode);
   } else {
     SpreadsheetApp.getUi().alert(
       "L'onglet '" +
         sheetName +
-        "' n'est pas reconnu.\nNoms valides : 'Révision-IB', 'T1', 'T2', 'T3', ou 'Eleve/Eleves'."
+        "' n'est pas reconnu.\nModifie le script pour ajouter tes propres noms d'onglets si besoin."
     );
   }
 }
@@ -40,6 +53,10 @@ function SynchroniserOngletActif() {
 // =========================================================================================
 // ENVOI DU PLANNING
 // =========================================================================================
+//
+// Personnalise ici les colonnes à traiter pour l'onglet Planning :
+// data[i][0] = colonne A, data[i][1] = colonne B, etc.
+// Ajoute, retire ou adapte les champs selon la structure de ton onglet.
 function EnvoyerPlanning(sheet, profCode) {
   const data = sheet.getDataRange().getValues();
   for (let i = 2; i < data.length; i++) {
@@ -84,6 +101,10 @@ function EnvoyerPlanning(sheet, profCode) {
 // =========================================================================================
 // ENVOI DES NOTES
 // =========================================================================================
+//
+// Personnalise ici les colonnes à traiter pour les onglets de notes :
+// data[i][0] = colonne A, data[i][1] = colonne B, etc.
+// Adapte les champs selon la structure de tes onglets de notes.
 function EnvoyerNotes(sheet, trim, profCode) {
   const data = sheet.getDataRange().getValues();
   for (let i = 2; i < data.length; i++) {
@@ -115,6 +136,10 @@ function EnvoyerNotes(sheet, trim, profCode) {
 // =========================================================================================
 // GESTION DES ELEVES (Création automatique et récupération des codes)
 // =========================================================================================
+//
+// Personnalise ici les colonnes à traiter pour l'onglet Eleves :
+// data[i][0] = colonne A, data[i][1] = colonne B, etc.
+// Adapte les champs selon la structure de ton onglet Eleves.
 function EnvoyerListeEleves(sheet, profCode) {
   const data = sheet.getDataRange().getValues();
   for (let i = 2; i < data.length; i++) {
