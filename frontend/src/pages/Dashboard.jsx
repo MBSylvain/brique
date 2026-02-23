@@ -206,22 +206,76 @@ export default function Dashboard() {
 
                 <div className="divide-y divide-slate-50">
                   {planning.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 p-8">
+                    <div className="p-8 space-y-10">
                       {[
-                        'cond', 'rec', 'deriv', 'signe', 'sg', 'cv', 'python', 'lim', 
-                        'graph', 'conv', 'vect', 'dte', 'lim_fn', 'co', 'den', 'trigo', 
-                        'plan', 'v', 'bino', 'integr', 'aire', 'int_plus', 'va', 'ed'
-                      ].map((key) => {
-                        const value = planning[0]?.[key];
-                        return (
-                          <div key={key} className="flex flex-col gap-1.5 group">
-                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">{key}</p>
-                            <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
-                              {value || <span className="text-slate-300">--</span>}
-                            </p>
+                        {
+                          title: 'Suites',
+                          color: 'text-emerald-500',
+                          items: [
+                            { key: 'rec', label: 'ib2' },
+                            { key: 'sg', label: 'b5' },
+                            { key: 'cv', label: 'ib6' },
+                            { key: 'python', label: 'ib7' },
+                            { key: 'lim', label: 'ib7bis' }
+                          ]
+                        },
+                        {
+                          title: 'Probabilités',
+                          color: 'text-amber-500',
+                          items: [
+                            { key: 'den', label: 'i' },
+                            { key: 'cond', label: 'ib1' },
+                            { key: 'v', label: 'ib18' },
+                            { key: 'va', label: 'ib22' }
+                          ]
+                        },
+                        {
+                          title: 'Fonctions',
+                          color: 'text-indigo-600',
+                          items: [
+                            { key: 'deriv', label: 'ib3' },
+                            { key: 'signe', label: 'ib4' },
+                            { key: 'graph', label: 'ib8' },
+                            { key: 'conv', label: 'ib9' },
+                            { key: 'lim_fn', label: 'ib12' },
+                            { key: 'co', label: 'ib13' },
+                            { key: 'trigo', label: 'ib15' },
+                            { key: 'integr', label: 'ib19' },
+                            { key: 'aire', label: 'ib20' },
+                            { key: 'int_plus', label: 'ib21' },
+                            { key: 'ed', label: 'ib23' }
+                          ]
+                        },
+                        {
+                          title: 'Géométrie & Autres',
+                          color: 'text-slate-400',
+                          items: [
+                            { key: 'vect', label: 'ib10' },
+                            { key: 'dte', label: 'ib11' },
+                            { key: 'plan', label: 'ib16' },
+                            { key: 'bino', label: 'ib17' }
+                          ]
+                        }
+                      ].map((group) => (
+                        <div key={group.title} className="space-y-4">
+                          <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${group.color} opacity-80 px-1`}>
+                            {group.title}
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                            {group.items.map((item) => {
+                              const value = planning[0]?.[item.key];
+                              return (
+                                <div key={item.key} className="flex flex-col gap-1.5 group">
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-indigo-400 transition-colors">{item.label}</p>
+                                  <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                                    {value || <span className="text-slate-200">--</span>}
+                                  </p>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="p-10 text-center">

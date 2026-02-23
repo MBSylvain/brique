@@ -540,13 +540,13 @@ export default function TeacherDashboard() {
                                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Chargement des données...</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                                     {/* Section Notes */}
                                     <div className="lg:col-span-2 space-y-6">
                                         <div className="flex items-center justify-between">
                                             <h3 className="text-xl font-black text-white flex items-center gap-3">
                                                 <div className="w-1.5 h-6 bg-indigo-500 rounded-full"></div>
-                                                Performances
+                                                Résultats
                                             </h3>
                                             <div className="flex gap-2 p-1 bg-slate-950 rounded-xl border border-slate-800">
                                                 {['T1', 'T2', 'T3'].map((tab) => (
@@ -589,6 +589,7 @@ export default function TeacherDashboard() {
                                                     </div>
                                                 ))}
                                             </div>
+                                            
                                         ) : (
                                             <div className="bg-slate-950/30 rounded-[2rem] p-16 text-center border border-slate-800 border-dashed">
                                                 <p className="text-slate-600 font-bold text-sm">Aucune note pour ce trimestre.</p>
@@ -597,33 +598,87 @@ export default function TeacherDashboard() {
                                     </div>
 
                                     {/* Section Planning */}
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 h-fit">
                                         <h3 className="text-xl font-black text-white flex items-center gap-3">
                                             <div className="w-1.5 h-6 bg-amber-500 rounded-full"></div>
                                             Planning
                                         </h3>
-                                        <div className="bg-slate-950/50 rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col h-[400px]">
+                                        <div className="bg-slate-950/50 rounded-[2rem] border border-slate-800 overflow-hidden flex flex-col h-fit">
                                             <div className="p-4 bg-slate-800/50 border-b border-slate-800">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Compétences & Avancement</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Planning Révision IB</p>
                                             </div>
                                             <div className="flex-1 overflow-y-auto divide-y divide-slate-800/50 custom-scrollbar">
                                                 {elevePlanning.length > 0 ? (
-                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 p-6">
+                                                    <div className="p-6 space-y-8">
                                                         {[
-                                                            'cond', 'rec', 'deriv', 'signe', 'sg', 'cv', 'python', 'lim',
-                                                            'graph', 'conv', 'vect', 'dte', 'lim_fn', 'co', 'den', 'trigo',
-                                                            'plan', 'v', 'bino', 'integr', 'aire', 'int_plus', 'va', 'ed'
-                                                        ].map((key) => {
-                                                            const value = elevePlanning[0]?.[key];
-                                                            return (
-                                                                <div key={key} className="flex flex-col gap-1 group">
-                                                                    <p className="text-[9px] font-black text-indigo-400/70 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">{key}</p>
-                                                                    <p className="text-xs font-bold text-slate-200">
-                                                                        {value || <span className="text-slate-700">--</span>}
-                                                                    </p>
+                                                            {
+                                                                title: 'Suites',
+                                                                color: 'text-emerald-400',
+                                                                items: [
+                                                                    { key: 'rec', label: 'ib2' },
+                                                                    { key: 'sg', label: 'b5' },
+                                                                    { key: 'cv', label: 'ib6' },
+                                                                    { key: 'python', label: 'ib7' },
+                                                                    { key: 'lim', label: 'ib7bis' }
+                                                                ]
+                                                            },
+                                                            {
+                                                                title: 'Proba',
+                                                                color: 'text-amber-400',
+                                                                items: [
+                                                                    { key: 'den', label: 'i' },
+                                                                    { key: 'cond', label: 'ib1' },
+                                                                    { key: 'v', label: 'ib18' },
+                                                                    { key: 'va', label: 'ib22' }
+                                                                ]
+                                                            },
+                                                            {
+                                                                title: 'Fonction',
+                                                                color: 'text-indigo-400',
+                                                                items: [
+                                                                    { key: 'deriv', label: 'ib3' },
+                                                                    { key: 'signe', label: 'ib4' },
+                                                                    { key: 'graph', label: 'ib8' },
+                                                                    { key: 'conv', label: 'ib9' },
+                                                                    { key: 'lim_fn', label: 'ib12' },
+                                                                    { key: 'co', label: 'ib13' },
+                                                                    { key: 'trigo', label: 'ib15' },
+                                                                    { key: 'integr', label: 'ib19' },
+                                                                    { key: 'aire', label: 'ib20' },
+                                                                    { key: 'int_plus', label: 'ib21' },
+                                                                    { key: 'ed', label: 'ib23' }
+                                                                ]
+                                                            },
+                                                            {
+                                                                title: 'Espace',
+                                                                color: 'text-orange-500',
+                                                                items: [
+                                                                    { key: 'vect', label: 'ib10' },
+                                                                    { key: 'dte', label: 'ib11' },
+                                                                    { key: 'plan', label: 'ib16' },
+                                                                    { key: 'bino', label: 'ib17' }
+                                                                ]
+                                                            }
+                                                        ].map((group) => (
+                                                            <div key={group.title} className="space-y-3">
+                                                                <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${group.color} opacity-80 px-1`}>
+                                                                    {group.title}
+                                                                </h4>
+                                                                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                                                                    {group.items.map((item) => {
+                                                                        const value = elevePlanning[0]?.[item.key];
+                                                                        return (
+                                                                            <div key={item.key} className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 flex flex-col gap-1 group hover:border-slate-700 transition-colors">
+                                                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-400 transition-colors">{item.label}</p>
+                                                                                <p className="text-xs font-bold text-slate-200">
+                                                                                    {value || <span className="text-slate-700">à valider</span>}
+                                                                                </p>
+                                                                            </div>
+                                                                        );
+                                                                    })}
                                                                 </div>
-                                                            );
-                                                        })}
+                                                            </div>
+                                                        ))}
                                                     </div>
                                                 ) : (
                                                     <div className="h-full flex flex-col items-center justify-center p-10 text-center">
