@@ -243,6 +243,11 @@ export default function Dashboard() {
                       icon: "📈",
                     },
                     {
+                      label: "Total Briques",
+                      value: currentNotes.total_briques,
+                      icon: "🧱",
+                    },
+                    {
                       label: "Brique IB",
                       value: currentNotes.brique_ib,
                       icon: "🧱",
@@ -251,11 +256,6 @@ export default function Dashboard() {
                       label: "Brique +",
                       value: currentNotes.brique_plus,
                       icon: "➕",
-                    },
-                    {
-                      label: "Total Briques",
-                      value: currentNotes.total_briques,
-                      icon: "🧱",
                     },
                   ].map((row, i) => (
                     <div
