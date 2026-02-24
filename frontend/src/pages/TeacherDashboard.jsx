@@ -831,15 +831,15 @@ export default function TeacherDashboard() {
                                 >
                                   {group.title}
                                 </h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+                                <div className="grid grid-cols-2 max-w-fit sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                                   {group.items.map((item) => {
                                     const value = elevePlanning[0]?.[item.key];
                                     return (
                                       <div
                                         key={item.key}
-                                        className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 flex flex-col justify-center gap-1 group hover:border-slate-700 transition-colors"
+                                        className="bg-slate-900/50 p-2 rounded-xl border border-slate-800/50 flex flex-col justify-center gap-1 group hover:border-slate-700 transition-colors"
                                       >
-                                        <p className="text-[10px] text-center wrap-break-word font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-400 transition-colors">
+                                        <p className="text-[8px] text-center wrap-break-word font-bold text-white uppercase tracking-widest group-hover:text-slate-400 transition-colors">
                                           {item.key}
                                         </p>
                                         <p className="text-xs text-center font-bold text-slate-200">
