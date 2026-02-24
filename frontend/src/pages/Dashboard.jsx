@@ -7,6 +7,7 @@ import {
   Calendar,
   ChevronRight,
   Loader2,
+  Check,
 } from "lucide-react";
 
 import DarkModeToggle from "../components/DarkModeToggle";
@@ -369,9 +370,14 @@ export default function Dashboard() {
                                     {item.key}
                                   </p>
                                   <p className="text-sm text-center font-bold text-slate-700">
-                                    {value || (
+                                    {value ? (
+                                      <>
+                                        {value}
+                                        <Check className="w-3 h-3 inline-block text-green-500 ml-1" />
+                                      </>
+                                    ) : (
                                       <span className="text-rose-500 font-medium italic text-[10px]">
-                                        à valider
+                                        --
                                       </span>
                                     )}
                                   </p>
