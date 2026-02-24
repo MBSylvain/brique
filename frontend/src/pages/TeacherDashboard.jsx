@@ -782,10 +782,26 @@ export default function TeacherDashboard() {
                                 color: "text-emerald-400",
                                 items: [
                                   { key: "récurrence", label: "ib2" },
-                                  { key: "Suite Géo", label: "b5" },
-                                  { key: "convergence", label: "ib6" },
-                                  { key: "Python", label: "ib7" },
-                                  { key: "Limites", label: "ib7bis" },
+                                  {
+                                    key: "Suite Géo",
+                                    label: "b5",
+                                    prevKey: "récurrence",
+                                  },
+                                  {
+                                    key: "convergence",
+                                    label: "ib6",
+                                    prevKey: "Suite Géo",
+                                  },
+                                  {
+                                    key: "Python",
+                                    label: "ib7",
+                                    prevKey: "convergence",
+                                  },
+                                  {
+                                    key: "Limites",
+                                    label: "ib7bis",
+                                    prevKey: "Python",
+                                  },
                                 ],
                               },
                               {
@@ -793,8 +809,16 @@ export default function TeacherDashboard() {
                                 color: "text-amber-400",
                                 items: [
                                   { key: "Proba cond", label: "ib1" },
-                                  { key: "Biniomiale", label: "ib18" },
-                                  { key: "VA", label: "ib22" },
+                                  {
+                                    key: "Biniomiale",
+                                    label: "ib18",
+                                    prevKey: "Proba cond",
+                                  },
+                                  {
+                                    key: "VA",
+                                    label: "ib22",
+                                    prevKey: "Biniomiale",
+                                  },
                                 ],
                               },
                               {
@@ -802,16 +826,56 @@ export default function TeacherDashboard() {
                                 color: "text-indigo-400",
                                 items: [
                                   { key: "dériver", label: "ib3" },
-                                  { key: "signe", label: "ib4" },
-                                  { key: "graphique", label: "ib8" },
-                                  { key: "convexite", label: "ib9" },
-                                  { key: "limites", label: "ib12" },
-                                  { key: "continuité", label: "ib13" },
-                                  { key: "Fns trigos", label: "ib15" },
-                                  { key: "calcul d'intégrales", label: "ib19" },
-                                  { key: "aire", label: "ib20" },
-                                  { key: "inégalités", label: "ib21" },
-                                  { key: "equa Diff", label: "ib23" },
+                                  {
+                                    key: "signe",
+                                    label: "ib4",
+                                    prevKey: "dériver",
+                                  },
+                                  {
+                                    key: "graphique",
+                                    label: "ib8",
+                                    prevKey: "signe",
+                                  },
+                                  {
+                                    key: "convexite",
+                                    label: "ib9",
+                                    prevKey: "graphique",
+                                  },
+                                  {
+                                    key: "limites",
+                                    label: "ib12",
+                                    prevKey: "convexite",
+                                  },
+                                  {
+                                    key: "continuité",
+                                    label: "ib13",
+                                    prevKey: "limites",
+                                  },
+                                  {
+                                    key: "Fns trigos",
+                                    label: "ib15",
+                                    prevKey: "continuité",
+                                  },
+                                  {
+                                    key: "calcul d'intégrales",
+                                    label: "ib19",
+                                    prevKey: "Fns trigos",
+                                  },
+                                  {
+                                    key: "aire",
+                                    label: "ib20",
+                                    prevKey: "calcul d'intégrales",
+                                  },
+                                  {
+                                    key: "inégalités",
+                                    label: "ib21",
+                                    prevKey: "aire",
+                                  },
+                                  {
+                                    key: "equa Diff",
+                                    label: "ib23",
+                                    prevKey: "inégalités",
+                                  },
                                 ],
                               },
                               {
@@ -819,9 +883,21 @@ export default function TeacherDashboard() {
                                 color: "text-orange-500",
                                 items: [
                                   { key: "vecteurs", label: "ib10" },
-                                  { key: "droite", label: "ib11" },
-                                  { key: "Equation Plan", label: "ib16" },
-                                  { key: "volume", label: "ib17" },
+                                  {
+                                    key: "droite",
+                                    label: "ib11",
+                                    prevKey: "vecteurs",
+                                  },
+                                  {
+                                    key: "Equation Plan",
+                                    label: "ib16",
+                                    prevKey: "droite",
+                                  },
+                                  {
+                                    key: "volume",
+                                    label: "ib17",
+                                    prevKey: "Equation Plan",
+                                  },
                                 ],
                               },
                             ].map((group) => (
@@ -831,25 +907,40 @@ export default function TeacherDashboard() {
                                 >
                                   {group.title}
                                 </h4>
-                                <div className="grid grid-cols-2 max-w-fit sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                                   {group.items.map((item) => {
                                     const value = elevePlanning[0]?.[item.key];
+                                    let display;
+                                    if (value) {
+                                      display = (
+                                        <Check className="w-3 h-3 text-green-500 mx-auto" />
+                                      );
+                                    } else if (
+                                      item.prevKey &&
+                                      elevePlanning[0]?.[item.prevKey]
+                                    ) {
+                                      display = (
+                                        <span className="text-amber-500 font-medium italic text-[10px]">
+                                          à débloquer
+                                        </span>
+                                      );
+                                    } else {
+                                      display = (
+                                        <span className="text-rose-500 font-medium italic text-[10px]">
+                                          🔒
+                                        </span>
+                                      );
+                                    }
                                     return (
                                       <div
                                         key={item.key}
-                                        className="bg-slate-900/50 p-2 rounded-xl border border-slate-800/50 flex flex-col justify-center gap-1 group hover:border-slate-700 transition-colors"
+                                        className="bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 flex flex-col justify-center gap-1 group hover:border-slate-700 transition-colors"
                                       >
-                                        <p className="text-[8px] text-center wrap-break-word font-bold text-white uppercase tracking-widest group-hover:text-slate-400 transition-colors">
+                                        <p className="text-[10px] text-center wrap-break-word font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-400 transition-colors">
                                           {item.key}
                                         </p>
                                         <p className="text-xs text-center font-bold text-slate-200">
-                                          {(value && (
-                                            <Check className="w-3 h-3 text-green-500 mx-auto" />
-                                          )) || (
-                                            <span className="text-rose-500 font-medium italic text-[10px]">
-                                              🔒
-                                            </span>
-                                          )}
+                                          {display}
                                         </p>
                                       </div>
                                     );
