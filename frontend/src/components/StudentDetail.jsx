@@ -331,7 +331,7 @@ export default function StudentDetail() {
             {/* Planning Section */}
             <div className="lg:col-span-6 space-y-6">
               <h2 className="text-2xl font-black text-white flex items-center gap-3 px-2">
-                <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
+                <div className="w-2 h-8 text-black bg-amber-500 rounded-full"></div>
                 Planning
               </h2>
 
@@ -342,7 +342,7 @@ export default function StudentDetail() {
                   </p>
                 </div>
 
-                <div className="divide-y divide-slate-800">
+                <div className="divide-y divide-slate-900">
                   {planning.length > 0 ? (
                     <div className="p-8 space-y-10">
                       {[
@@ -561,7 +561,7 @@ export default function StudentDetail() {
                                   </div>
                                 );
                                 statusColor =
-                                  "border-green-500/30 bg-green-500/5";
+                                  "border-green-500/30 bg-green-500/5 border-3";
                               } else if (value !== "" && planning[0]?.[item.nextKey] == ""
                               ) {
                                 display = (
@@ -570,7 +570,7 @@ export default function StudentDetail() {
                                   </span>
                                 );
                                 statusColor =
-                                  "border-amber-500/30 bg-amber-500/5";
+                                  "border-amber-500/30 bg-amber-500/5 border-3";
                               } else {
                                 display = (
                                   <span className="text-rose-500 font-medium italic text-[10px]">
@@ -578,7 +578,7 @@ export default function StudentDetail() {
                                   </span>
                                 );
                                 statusColor =
-                                  "border-rose-500/30 bg-rose-500/5";
+                                  "border-rose-500/30 bg-rose-500/5 border-3";
                               }
 
                               return (

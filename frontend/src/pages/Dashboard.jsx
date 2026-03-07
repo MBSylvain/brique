@@ -298,19 +298,19 @@ export default function Dashboard() {
             
             {/* Planning Section */}
             <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-2xl font-black text-white flex items-center gap-3 px-2">
+              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3 px-2">
                 <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
                 Planning
               </h2>
 
-              <div className="bg-slate-900/50 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
+              <div className="bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
                 <div className="p-6 bg-slate-900 border-b border-slate-800">
                   <p className="text-xs font-black text-slate-200 uppercase tracking-widest text-center">
                     Planning Révisions IB
                   </p>
                 </div>
 
-                <div className="divide-y divide-slate-800">
+                <div className="divide-y divide-slate-900">
                   {planning.length > 0 ? (
                     <div className="p-8 space-y-10">
                       {[
@@ -529,7 +529,7 @@ export default function Dashboard() {
                                   </div>
                                 );
                                 statusColor =
-                                  "border-green-500/30 bg-green-500/5";
+                                  "border-3 border-green-500/30 bg-green-500/5";
                               } else if (value !== "" && planning[0]?.[item.nextKey] == ""
                               ) {
                                 display = (
@@ -538,7 +538,7 @@ export default function Dashboard() {
                                   </span>
                                 );
                                 statusColor =
-                                  "border-amber-500/30 bg-amber-500/5";
+                                  "border-3 border-amber-500/30 bg-amber-500/5";
                               } else {
                                 display = (
                                   <span className="text-rose-500 font-medium italic text-[10px]">
@@ -546,7 +546,7 @@ export default function Dashboard() {
                                   </span>
                                 );
                                 statusColor =
-                                  "border-rose-500/30 bg-rose-500/5";
+                                  "border-3 border-rose-500/30 bg-rose-500/5";
                               }
 
                               return (
