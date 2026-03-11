@@ -23,6 +23,7 @@ export default function StudentDetail() {
   const [activeTab, setActiveTab] = useState("T1");
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState(null);
+  const [eleaVideo, setEleaVideo] = useState([]);
 
   useEffect(() => {
     const staffData = localStorage.getItem("staff_data");
@@ -78,10 +79,22 @@ export default function StudentDetail() {
         throw planningError;
 
       setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : []);
+      
+      // 4. Récupération des Elea video
+      const { data: eleaVideoData, error: eleaVideoError } = await supabase
+        .from("eleas_video")
+        .select("*")
+        .eq("eleve_id", id);
+
+      if (eleaVideoError) throw eleaVideoError;
+
+      setEleaVideo(eleaVideoData);
 
       // Debug : vérifier les données récupérées
       console.log("Planning data:", planningData);
       console.log("Indicateurs:", planningData?.indicateurs);
+      console.log("Elea video:", eleaVideoData);
+      console.log("Eleves:", studentData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
