@@ -47,7 +47,7 @@ function App() {
         <Route
           path="/StudentDetail/:id"
           element={
-            <ProtectedRoute allowedType="teacher">
+            <ProtectedRoute allowedType="staff">
               <StudentDetail />
             </ProtectedRoute>
           }

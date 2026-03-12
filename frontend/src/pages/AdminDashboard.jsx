@@ -13,7 +13,6 @@ import {
   BookOpen,
 } from "lucide-react";
 
-import EleveDetailModal from "../components/EleveDetailModal";
 import DarkModeToggle from "../components/DarkModeToggle";
 
 export default function AdminDashboard() {
@@ -24,54 +23,11 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterClass, setFilterClass] = useState("All");
   const [filterLevel, setFilterLevel] = useState("All");
-  // Ajout pour modal détail élève
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedEleve, setSelectedEleve] = useState(null);
-  const [activeEleveTab, setActiveEleveTab] = useState("T1");
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [eleveNotes, setEleveNotes] = useState([]);
-  const [elevePlanning, setElevePlanning] = useState([]);
 
   // Fonction pour charger les détails d'un élève (notes et planning)
   const fetchEleveDetails = async (eleve) => {
-    setSelectedEleve(eleve);
-    setShowDetailModal(true);
-    setLoadingDetails(true);
-    setActiveEleveTab("T1");
-    try {
-      // 1. Fetch notes
-      const { data: notesData, error: notesError } = await supabase
-        .from("notes")
-        .select("*")
-        .eq("eleve_id", eleve.id);
-
-      if (notesError) throw notesError;
-
-      const flattenedNotes =
-        notesData?.map((n) => ({
-          ...n.donnees,
-          trimestre: `T${n.trimestre}`,
-          id: n.id,
-        })) || [];
-      setEleveNotes(flattenedNotes);
-
-      // 2. Fetch planning
-      const { data: planningData, error: planningError } = await supabase
-        .from("planning")
-        .select("*")
-        .eq("eleve_id", eleve.id)
-        .single();
-
-      if (planningError && planningError.code !== "PGRST116")
-        throw planningError;
-      setElevePlanning(
-        planningData?.indicateurs ? [planningData.indicateurs] : [],
-      );
-    } catch (err) {
-      console.error("Error fetching student details:", err);
-    } finally {
-      setLoadingDetails(false);
-    }
+    navigate(`../StudentDetail/${eleve.id}`);
   };
 
   useEffect(() => {
@@ -365,21 +321,6 @@ export default function AdminDashboard() {
         </div>
       </main>
 
-      {/* Modal Détails Élève */}
-      <EleveDetailModal
-        isOpen={showDetailModal && !!selectedEleve}
-        onClose={() => setShowDetailModal(false)}
-        eleve={selectedEleve || {}}
-        notes={
-          Array.isArray(eleveNotes)
-            ? eleveNotes.filter((n) => n.trimestre === activeEleveTab)
-            : []
-        }
-        planning={Array.isArray(elevePlanning) ? elevePlanning : []}
-        activeTab={activeEleveTab}
-        setActiveTab={setActiveEleveTab}
-        loading={loadingDetails}
-      />
     </div>
   );
 }

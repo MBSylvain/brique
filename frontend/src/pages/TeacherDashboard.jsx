@@ -38,11 +38,6 @@ export default function TeacherDashboard() {
   });
 
   const [selectedEleve, setSelectedEleve] = useState(null);
-  const [eleveNotes, setEleveNotes] = useState([]);
-  const [elevePlanning, setElevePlanning] = useState([]);
-  const [activeEleveTab, setActiveEleveTab] = useState("T1");
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [eleveToEdit, setEleveToEdit] = useState(null);
