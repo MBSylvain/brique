@@ -41,7 +41,12 @@ function SynchroniserOngletActif() {
   } else if (sheetName.toLowerCase().includes("eleve")) {
     // Tu peux remplacer "eleve" par un autre mot-clé si besoin
     EnvoyerListeEleves(sheet, profCode);
-  } else {
+  }
+  // === NOUVEL ONGLET ELEA VIDÉO ===
+  else if (sheetName === "ELEA Vidéo") {
+    EnvoyerELEAVideo(sheet, profCode);
+  } 
+   else {
     SpreadsheetApp.getUi().alert(
       "L'onglet '" +
         sheetName +
@@ -131,6 +136,90 @@ function EnvoyerNotes(sheet, trim, profCode) {
     }
   }
   SpreadsheetApp.getUi().alert("Export Notes (T" + trim + ") terminé !");
+}
+
+// =========================================================================================
+// ENVOI ELEA VIDÉO - RÉCUPÉRATION DE TOUTES LES COLONNES
+// =========================================================================================
+function EnvoyerELEAVideo(sheet, profCode) {
+  const data = sheet.getDataRange().getValues();
+  
+  // Ligne 1 : en-têtes de trimestre (T1, T2, T3) - optionnel
+  // Ligne 2 : sous-titres (S1-V1, F0-V1, etc.) - optionnel
+  
+  // Déterminer le trimestre
+  const sheetName = sheet.getName();
+  let trimestre = 1;
+  if (sheetName === "T2") trimestre = 2;
+  else if (sheetName === "T3") trimestre = 3;
+  
+  Logger.log("=== DÉBUT SYNCHRONISATION ELEA VIDÉO ===");
+  Logger.log("Onglet: " + sheetName);
+  Logger.log("Trimestre: " + trimestre);
+  
+  let compteur = 0;
+  
+  // Parcourir toutes les lignes à partir de la ligne 3 (index 2)
+  for (let i = 2; i < data.length; i++) {
+    const prenom = data[i][0] ? data[i][0].toString().trim() : "";  // Colonne A
+    const nom = data[i][1] ? data[i][1].toString().trim() : "";     // Colonne B
+    
+    if (prenom === "" || nom === "") continue;
+    
+    // Construction de l'objet donnees avec TOUTES les colonnes
+    const donnees = {};
+    
+    // Parcourir TOUTES les colonnes à partir de C (index 2) jusqu'à la fin
+    for (let j = 2; j < data[i].length; j++) {
+      // Créer une clé simple : col_C, col_D, col_E, etc.
+      const colonneLettre = indexToColumnLetter(j);
+      const cle = `col_${colonneLettre}`;
+      
+      // Récupérer la valeur (garder même les valeurs vides)
+      const valeur = data[i][j];
+      
+      // Stocker la valeur (convertir en nombre si possible)
+      donnees[cle] = ToNum(valeur);
+    }
+    
+    // LOG : nombre de colonnes pour cet élève
+    Logger.log(`Élève ${compteur + 1}: ${nom} ${prenom} - ${Object.keys(donnees).length} colonnes`);
+    
+    // Afficher les 5 premières colonnes en exemple
+    const premieresColonnes = Object.entries(donnees).slice(0, 5);
+    Logger.log("  Exemple: " + JSON.stringify(Object.fromEntries(premieresColonnes)));
+    
+    const jsonBody = {
+      p_nom: EscapeJson(nom),
+      p_prenom: EscapeJson(prenom),
+      p_trimestre: trimestre,
+      p_code_professeur: profCode,
+      p_donnees: donnees  // Toutes les colonnes
+    };
+    
+    // Envoyer à Supabase
+    SendRpcRequest("sync_eleas_video_excel", jsonBody);
+    compteur++;
+  }
+  
+  Logger.log(`=== SYNCHRONISATION TERMINÉE: ${compteur} élèves ===`);
+  
+  SpreadsheetApp.getUi().alert(
+    `Export ELEA Vidéo terminé !\n` +
+    `${compteur} élèves synchronisés\n` +
+    `Trimestre ${trimestre}`
+  );
+}
+
+// Fonction utilitaire pour convertir un index en lettre de colonne (0=A, 1=B, ...)
+function indexToColumnLetter(index) {
+  let temp, letter = '';
+  while (index >= 0) {
+    temp = index % 26;
+    letter = String.fromCharCode(temp + 65) + letter;
+    index = Math.floor(index / 26) - 1;
+  }
+  return letter;
 }
 
 // =========================================================================================

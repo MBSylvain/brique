@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import DarkModeToggle from "../components/DarkModeToggle";
+import VideoSection from "../components/VideoSection";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function Dashboard() {
   const [planning, setPlanning] = useState([]);
   const [activeTab, setActiveTab] = useState("T1");
   const [loading, setLoading] = useState(true);
+  const [eleaVideo, setEleaVideo] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem("eleve_data");
@@ -63,6 +65,15 @@ export default function Dashboard() {
       if (planningError && planningError.code !== "PGRST116")
         throw planningError;
       setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : []);
+
+      // 3. Récupérer les données vidéos
+      const { data: eleaVideoData, error: eleaVideoError } = await supabase
+        .from("eleas_video")
+        .select("*")
+        .eq("eleve_id", userData.id);
+
+      if (eleaVideoError) throw eleaVideoError;
+      setEleaVideo(eleaVideoData || []);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
@@ -586,6 +597,11 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Section Vidéos ELEAS */}
+          <div className="mt-10">
+            <VideoSection eleaVideo={eleaVideo} activeTab={activeTab} />
           </div>
         </div>
       </main>

@@ -13,6 +13,7 @@ import {
   Users,
   ArrowLeftCircle,
 } from "lucide-react";
+import VideoSection from "./VideoSection";
 
 export default function StudentDetail() {
   const navigate = useNavigate();
@@ -631,6 +632,11 @@ export default function StudentDetail() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Section Vidéos ELEAS */}
+          <div className="mt-10">
+            <VideoSection eleaVideo={eleaVideo} activeTab={activeTab} />
           </div>
         </div>
       </main>
