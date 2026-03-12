@@ -37,6 +37,9 @@ export default function VideoSection({ eleaVideo, activeTab }) {
       }
 
       // C. Règle métier : On ne garde que les vidéos avec une note < 8 ou non commencées (null).
+      // On exclut les QCM de cette section
+      if (key.toLowerCase().includes("qcm")) return false;
+
       return score === null || (typeof score === 'number' && score < 8);
     })
     .map(([key, score]) => {

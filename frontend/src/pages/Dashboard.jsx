@@ -13,6 +13,7 @@ import {
 
 import DarkModeToggle from "../components/DarkModeToggle";
 import VideoSection from "../components/VideoSection";
+import QcmSection from "../components/QcmSection";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("T1");
   const [loading, setLoading] = useState(true);
   const [eleaVideo, setEleaVideo] = useState([]);
+  const [qcm, setQcm] = useState([]);
 
   useEffect(() => {
     const userData = localStorage.getItem("eleve_data");
@@ -74,6 +76,9 @@ export default function Dashboard() {
 
       if (eleaVideoError) throw eleaVideoError;
       setEleaVideo(eleaVideoData || []);
+
+      // Les QCM sont dans la même table eleas_video (mêmes données que vidéos)
+      setQcm(eleaVideoData || []);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
@@ -600,8 +605,9 @@ export default function Dashboard() {
           </div>
 
           {/* Section Vidéos ELEAS */}
-          <div className="mt-10">
+          <div className="mt-10 space-y-10">
             <VideoSection eleaVideo={eleaVideo} activeTab={activeTab} />
+            <QcmSection qcmData={qcm} activeTab={activeTab} />
           </div>
         </div>
       </main>

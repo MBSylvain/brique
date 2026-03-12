@@ -14,6 +14,7 @@ import {
   ArrowLeftCircle,
 } from "lucide-react";
 import VideoSection from "./VideoSection";
+import QcmSection from "./QcmSection";
 
 export default function StudentDetail() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function StudentDetail() {
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState(null);
   const [eleaVideo, setEleaVideo] = useState([]);
+  const [qcm, setQcm] = useState([]);
 
   useEffect(() => {
     const staffData = localStorage.getItem("staff_data");
@@ -91,11 +93,15 @@ export default function StudentDetail() {
 
       setEleaVideo(eleaVideoData);
 
+      // Les QCM sont dans la même table que les vidéos
+      setQcm(eleaVideoData);
+
       // Debug : vérifier les données récupérées
       console.log("Planning data:", planningData);
       console.log("Indicateurs:", planningData?.indicateurs);
       console.log("Elea video:", eleaVideoData);
       console.log("Eleves:", studentData);
+      console.log("QCM data:", qcmData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
@@ -635,8 +641,9 @@ export default function StudentDetail() {
           </div>
 
           {/* Section Vidéos ELEAS */}
-          <div className="mt-10">
+          <div className="mt-10 space-y-10">
             <VideoSection eleaVideo={eleaVideo} activeTab={activeTab} />
+            <QcmSection qcmData={qcm} activeTab={activeTab} />
           </div>
         </div>
       </main>
