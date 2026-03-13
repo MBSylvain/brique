@@ -73,7 +73,7 @@ export default function VideoSection({ eleaVideo, activeTab }) {
         </span>
       </div>
       {/** Section résultats  */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 xl:grid-cols-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 xl:grid-cols-5">
         {videosToWork.map((video) => (
           <div
             key={video.code}
