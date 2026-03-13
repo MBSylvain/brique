@@ -93,14 +93,22 @@ export default function StudentDetail() {
 
       setEleaVideo(eleaVideoData);
 
-      // Les QCM sont dans la même table que les vidéos
-      setQcm(eleaVideoData);
+      // 4. Récupérer les données QCM depuis sa propre table
+      const { data: qcmData, error: qcmError } = await supabase
+        .from("qcm")
+        .select("*")
+        .eq("eleve_id", id);
+
+      if (qcmError) throw qcmError;
+      setQcm(qcmData);
+      
 
       // Debug : vérifier les données récupérées
       console.log("Planning data:", planningData);
       console.log("Indicateurs:", planningData?.indicateurs);
       console.log("Elea video:", eleaVideoData);
       console.log("Eleves:", studentData);
+      console.log("QCM data:", qcm);
       console.log("QCM data:", qcmData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
@@ -643,6 +651,9 @@ export default function StudentDetail() {
           {/* Section Vidéos ELEAS */}
           <div className="mt-10 space-y-10">
             <VideoSection eleaVideo={eleaVideo} activeTab={activeTab} />
+          </div>
+          {/* Section QCM */}
+          <div className="mt-10">
             <QcmSection qcmData={qcm} activeTab={activeTab} />
           </div>
         </div>

@@ -77,8 +77,16 @@ export default function Dashboard() {
       if (eleaVideoError) throw eleaVideoError;
       setEleaVideo(eleaVideoData || []);
 
-      // Les QCM sont dans la même table eleas_video (mêmes données que vidéos)
-      setQcm(eleaVideoData || []);
+      // 4. Récupérer les données QCM depuis sa propre table
+      const { data: qcmData, error: qcmError } = await supabase
+        .from("qcm")
+        .select("*")
+        .eq("eleve_id", userData.id);
+
+      if (qcmError) throw qcmError;
+      setQcm(qcmData || []);
+      console.log("QCM data:", qcmData);
+
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {

@@ -46,6 +46,10 @@ function SynchroniserOngletActif() {
   else if (sheetName === "ELEA Vidéo") {
     EnvoyerELEAVideo(sheet, profCode);
   } 
+  // === NOUVEL ONGLET QCM ===
+  else if (sheetName.startsWith("QCM")) {
+    EnvoyerQCM(sheet, profCode);
+  }
    else {
     SpreadsheetApp.getUi().alert(
       "L'onglet '" +
@@ -208,6 +212,54 @@ function EnvoyerELEAVideo(sheet, profCode) {
     `Export ELEA Vidéo terminé !\n` +
     `${compteur} élèves synchronisés\n` +
     `Trimestre ${trimestre}`
+  );
+}
+
+// =========================================================================================
+// ENVOI QCM - RÉCUPÉRATION DE TOUTES LES COLONNES
+// =========================================================================================
+function EnvoyerQCM(sheet, profCode) {
+  const data = sheet.getDataRange().getValues();
+  
+  Logger.log("=== DÉBUT SYNCHRONISATION QCM ===");
+  
+  let compteur = 0;
+  
+  // Parcourir toutes les lignes à partir de la ligne 3 (index 2)
+  for (let i = 2; i < data.length; i++) {
+    const prenom = data[i][0] ? data[i][0].toString().trim() : "";  // Colonne A
+    const nom = data[i][1] ? data[i][1].toString().trim() : "";     // Colonne B
+    
+    if (prenom === "" || nom === "") continue;
+    
+    // Construction de l'objet donnees avec TOUTES les colonnes
+    const donnees = {};
+    
+    // Parcourir TOUTES les colonnes à partir de C (index 2) jusqu'à la fin
+    for (let j = 2; j < data[i].length; j++) {
+      const colonneLettre = indexToColumnLetter(j);
+      const cle = `col_${colonneLettre}`;
+      const valeur = data[i][j];
+      donnees[cle] = ToNum(valeur);
+    }
+    
+    const jsonBody = {
+      p_nom: EscapeJson(nom),
+      p_prenom: EscapeJson(prenom),
+      p_code_professeur: profCode,
+      p_donnees: donnees
+    };
+    
+    // Envoyer à Supabase
+    SendRpcRequest("sync_qcm_excel", jsonBody);
+    compteur++;
+  }
+  
+  Logger.log(`=== SYNCHRONISATION TERMINÉE: ${compteur} élèves ===`);
+  
+  SpreadsheetApp.getUi().alert(
+    `Export QCM terminé !\n` +
+    `${compteur} élèves synchronisés`
   );
 }
 

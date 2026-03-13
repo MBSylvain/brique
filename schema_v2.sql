@@ -98,12 +98,27 @@ CREATE TABLE public.planning (
     UNIQUE(eleve_id)
 );
 
+-- 9. Table des QCM
+CREATE TABLE public.qcm (
+  id uuid NOT NULL DEFAULT gen_random_uuid (),
+  eleve_id uuid NOT NULL,
+  donnees jsonb NOT NULL DEFAULT '{}'::jsonb,
+  derniere_maj timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT qcm_pkey PRIMARY KEY (id),
+  CONSTRAINT qcm_eleve_id_key UNIQUE (eleve_id),
+  CONSTRAINT qcm_eleve_id_fkey FOREIGN KEY (eleve_id) REFERENCES public.eleves (id) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS idx_qcm_eleve_id ON public.qcm USING btree (eleve_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_qcm_derniere_maj ON public.qcm USING btree (derniere_maj DESC) TABLESPACE pg_default;
+
 -- RLS (Sécurité)
 ALTER TABLE public.professeurs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.classes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.eleves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.planning ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.qcm ENABLE ROW LEVEL SECURITY;
 
 -- Politiques de base (Propriétaire gère tout)
 CREATE POLICY "Prof gère son profil" ON public.professeurs FOR ALL USING (auth.uid() = id);
@@ -111,11 +126,13 @@ CREATE POLICY "Prof gère ses classes" ON public.classes FOR ALL USING (professe
 CREATE POLICY "Prof gère ses élèves" ON public.eleves FOR ALL USING (classe_id IN (SELECT id FROM public.classes WHERE professeur_id = auth.uid()));
 CREATE POLICY "Prof gère ses notes" ON public.notes FOR ALL USING (eleve_id IN (SELECT e.id FROM public.eleves e JOIN public.classes c ON e.classe_id = c.id WHERE c.professeur_id = auth.uid()));
 CREATE POLICY "Prof gère son planning" ON public.planning FOR ALL USING (eleve_id IN (SELECT e.id FROM public.eleves e JOIN public.classes c ON e.classe_id = c.id WHERE c.professeur_id = auth.uid()));
+CREATE POLICY "Prof gère ses QCM" ON public.qcm FOR ALL USING (eleve_id IN (SELECT e.id FROM public.eleves e JOIN public.classes c ON e.classe_id = c.id WHERE c.professeur_id = auth.uid()));
 
 -- Lecture pour les élèves (Public et Anonyme pour la connexion via code)
 CREATE POLICY "Lecture publique élèves" ON public.eleves FOR SELECT USING (true);
 CREATE POLICY "Lecture publique notes" ON public.notes FOR SELECT USING (true);
 CREATE POLICY "Lecture publique planning" ON public.planning FOR SELECT USING (true);
+CREATE POLICY "Lecture publique qcm" ON public.qcm FOR SELECT USING (true);
 
 -- Fonctions RPC pour Excel
 CREATE OR REPLACE FUNCTION public.sync_notes_excel(p_nom text, p_prenom text, p_trimestre integer, p_donnees jsonb, p_code_professeur text)
@@ -127,6 +144,33 @@ BEGIN
     IF v_eleve_id IS NULL THEN RAISE EXCEPTION 'Élève non trouvé'; END IF;
     INSERT INTO public.notes (eleve_id, trimestre, donnees, derniere_maj) VALUES (v_eleve_id, p_trimestre, p_donnees, now())
     ON CONFLICT (eleve_id, trimestre) DO UPDATE SET donnees = EXCLUDED.donnees, derniere_maj = now();
+    RETURN v_eleve_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.sync_eleas_video_excel(p_nom text, p_prenom text, p_trimestre integer, p_donnees jsonb, p_code_professeur text)
+RETURNS uuid AS $$
+DECLARE v_eleve_id uuid;
+BEGIN
+    SELECT e.id INTO v_eleve_id FROM public.eleves e JOIN public.classes c ON e.classe_id = c.id JOIN public.professeurs p ON c.professeur_id = p.id
+    WHERE e.nom = p_nom AND e.prenom = p_prenom AND p.code_professeur = p_code_professeur;
+    IF v_eleve_id IS NULL THEN RAISE EXCEPTION 'Élève non trouvé'; END IF;
+    -- Note: Cette fonction suppose que la table eleas_video existe (définie ailleurs ou à ajouter)
+    INSERT INTO public.eleas_video (eleve_id, trimestre, donnees, derniere_maj) VALUES (v_eleve_id, p_trimestre, p_donnees, now())
+    ON CONFLICT (eleve_id, trimestre) DO UPDATE SET donnees = EXCLUDED.donnees, derniere_maj = now();
+    RETURN v_eleve_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.sync_qcm_excel(p_nom text, p_prenom text, p_donnees jsonb, p_code_professeur text)
+RETURNS uuid AS $$
+DECLARE v_eleve_id uuid;
+BEGIN
+    SELECT e.id INTO v_eleve_id FROM public.eleves e JOIN public.classes c ON e.classe_id = c.id JOIN public.professeurs p ON c.professeur_id = p.id
+    WHERE e.nom = p_nom AND e.prenom = p_prenom AND p.code_professeur = p_code_professeur;
+    IF v_eleve_id IS NULL THEN RAISE EXCEPTION 'Élève non trouvé'; END IF;
+    INSERT INTO public.qcm (eleve_id, donnees, derniere_maj) VALUES (v_eleve_id, p_donnees, now())
+    ON CONFLICT (eleve_id) DO UPDATE SET donnees = EXCLUDED.donnees, derniere_maj = now();
     RETURN v_eleve_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -175,3 +219,5 @@ GRANT ALL ON TABLE public.notes TO postgres, service_role, authenticated;
 GRANT SELECT ON TABLE public.notes TO anon;
 GRANT ALL ON TABLE public.planning TO postgres, service_role, authenticated;
 GRANT SELECT ON TABLE public.planning TO anon;
+GRANT ALL ON TABLE public.qcm TO postgres, service_role, authenticated;
+GRANT SELECT ON TABLE public.qcm TO anon;

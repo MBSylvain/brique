@@ -3,17 +3,12 @@ import { ClipboardCheck, AlertTriangle, Info, CheckCircle2 } from "lucide-react"
 export default function QcmSection({ qcmData, activeTab }) {
   // 1. Détermination du trimestre actif
   const currentTabNumber = parseInt(activeTab.replace("T", ""));
-  console.log("QcmSection - activeTab:", activeTab);
-  console.log("QcmSection - qcmData received:", qcmData);
+  
 
-  // La structure fournie par l'utilisateur montre un Array(1) 
-  // avec un objet contenant un champ 'donnees' qui agrège tous les trimestres (t1_, t2_, t3_).
+  // La structure dans la BDD est un objet avec un champ 'donnees' (jsonb)
   const qcmRow = Array.isArray(qcmData) && qcmData.length > 0 ? qcmData[0] : null;
 
-  console.log("QcmSection - Row selected:", qcmRow);
-
   if (!qcmRow || !qcmRow.donnees) {
-    console.log("QcmSection - No row or no 'donnees' property found, returns null");
     return null;
   }
 
@@ -21,11 +16,16 @@ export default function QcmSection({ qcmData, activeTab }) {
   const qcmsToWork = Object.entries(qcmRow.donnees)
     .filter(([key, score]) => {
       // Analyse du préfixe (ex: "t1_qcm1")
-      const prefixMatch = key.match(/^t([1-3])_/i);
+      const prefixMatch = key.toLowerCase().match(/^t([1-3])_/i);
       const keyTrimestre = prefixMatch ? parseInt(prefixMatch[1]) : null;
 
       // Uniquement le trimestre actif
       if (keyTrimestre !== null && keyTrimestre !== currentTabNumber) {
+        return false;
+      }
+
+      // S'assurer que c'est bien un QCM
+      if (!key.toLowerCase().includes("qcm")) {
         return false;
       }
 
