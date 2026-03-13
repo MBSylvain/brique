@@ -45,12 +45,9 @@ function SynchroniserOngletActif() {
   // === NOUVEL ONGLET ELEA VIDÉO ===
   else if (sheetName === "ELEA Vidéo") {
     EnvoyerELEAVideo(sheet, profCode);
-  } 
-  // === NOUVEL ONGLET QCM ===
-  else if (sheetName.startsWith("QCM")) {
+  } else if (sheetName === "QCM") {
     EnvoyerQCM(sheet, profCode);
-  }
-   else {
+   }else {
     SpreadsheetApp.getUi().alert(
       "L'onglet '" +
         sheetName +
@@ -143,25 +140,22 @@ function EnvoyerNotes(sheet, trim, profCode) {
 }
 
 // =========================================================================================
-// ENVOI ELEA VIDÉO - RÉCUPÉRATION DE TOUTES LES COLONNES
+// ENVOI ELEA VIDÉO - AVEC TRIMESTRE (ligne 1) + SOUS-TITRES (ligne 2)
 // =========================================================================================
 function EnvoyerELEAVideo(sheet, profCode) {
   const data = sheet.getDataRange().getValues();
   
-  // Ligne 1 : en-têtes de trimestre (T1, T2, T3) - optionnel
-  // Ligne 2 : sous-titres (S1-V1, F0-V1, etc.) - optionnel
+  // Ligne 1 : en-têtes de trimestre (T1, T2, T3)
+  const trimestreHeaders = data[1];
   
-  // Déterminer le trimestre
-  const sheetName = sheet.getName();
-  let trimestre = 1;
-  if (sheetName === "T2") trimestre = 2;
-  else if (sheetName === "T3") trimestre = 3;
+  // Ligne 2 : sous-titres (S1-V1, F0-V1, etc.)
+  const subHeaders = data[2];
   
   Logger.log("=== DÉBUT SYNCHRONISATION ELEA VIDÉO ===");
-  Logger.log("Onglet: " + sheetName);
-  Logger.log("Trimestre: " + trimestre);
+  Logger.log("Onglet: " + sheet.getName());
   
   let compteur = 0;
+  let totalColonnes = 0;
   
   // Parcourir toutes les lignes à partir de la ligne 3 (index 2)
   for (let i = 2; i < data.length; i++) {
@@ -172,33 +166,58 @@ function EnvoyerELEAVideo(sheet, profCode) {
     
     // Construction de l'objet donnees avec TOUTES les colonnes
     const donnees = {};
+    let nbColonnes = 0;
     
-    // Parcourir TOUTES les colonnes à partir de C (index 2) jusqu'à la fin
+    // Parcourir TOUTES les colonnes à partir de C (index 2)
     for (let j = 2; j < data[i].length; j++) {
-      // Créer une clé simple : col_C, col_D, col_E, etc.
-      const colonneLettre = indexToColumnLetter(j);
-      const cle = `col_${colonneLettre}`;
       
-      // Récupérer la valeur (garder même les valeurs vides)
-      const valeur = data[i][j];
+      // 1. Récupérer le trimestre (ligne 1)
+      const trimestre = trimestreHeaders[j] ? trimestreHeaders[j].toString().trim() : "";
       
-      // Stocker la valeur (convertir en nombre si possible)
-      donnees[cle] = ToNum(valeur);
+      // 2. Récupérer le sous-titre (ligne 2)
+      const sousTitre = subHeaders[j] ? subHeaders[j].toString().trim() : "";
+      
+      // Ne traiter que si on a les deux informations
+      if (trimestre && sousTitre) {
+        
+        // Nettoyer le trimestre (T1 -> t1, T2 -> t2)
+        const trimestreClean = trimestre
+          .replace(/\s+/g, '_')
+          .replace(/-/g, '_')
+          .toLowerCase();
+        
+        // Nettoyer le sous-titre (S1-V1 -> s1_v1, F0-V1 -> f0_v1)
+        const sousTitreClean = sousTitre
+          .replace(/\s+/g, '_')
+          .replace(/-/g, '_')
+          .toLowerCase();
+        
+        // Construire la clé finale: t1_s1_v1
+        const cle = `${trimestreClean}_${sousTitreClean}`;
+        
+        // Récupérer la valeur
+        const valeur = data[i][j];
+        
+        // Stocker la valeur
+        donnees[cle] = ToNum(valeur);
+        nbColonnes++;
+      }
     }
     
-    // LOG : nombre de colonnes pour cet élève
-    Logger.log(`Élève ${compteur + 1}: ${nom} ${prenom} - ${Object.keys(donnees).length} colonnes`);
+    totalColonnes += nbColonnes;
     
-    // Afficher les 5 premières colonnes en exemple
-    const premieresColonnes = Object.entries(donnees).slice(0, 5);
-    Logger.log("  Exemple: " + JSON.stringify(Object.fromEntries(premieresColonnes)));
+    // LOG pour vérifier
+    Logger.log(`Élève ${compteur + 1}: ${nom} ${prenom} - ${nbColonnes} indicateurs`);
+    
+    // Afficher les 5 premières clés en exemple
+    const premieresCles = Object.keys(donnees).slice(0, 5);
+    Logger.log("  Exemple: " + JSON.stringify(premieresCles));
     
     const jsonBody = {
       p_nom: EscapeJson(nom),
       p_prenom: EscapeJson(prenom),
-      p_trimestre: trimestre,
       p_code_professeur: profCode,
-      p_donnees: donnees  // Toutes les colonnes
+      p_donnees: donnees
     };
     
     // Envoyer à Supabase
@@ -206,42 +225,115 @@ function EnvoyerELEAVideo(sheet, profCode) {
     compteur++;
   }
   
-  Logger.log(`=== SYNCHRONISATION TERMINÉE: ${compteur} élèves ===`);
+  Logger.log("=== RÉCAPITULATIF ===");
+  Logger.log(`Total élèves: ${compteur}`);
+  Logger.log(`Total indicateurs: ${totalColonnes}`);
+  Logger.log(`Moyenne: ${(totalColonnes / compteur).toFixed(1)} indicateurs/élève`);
   
   SpreadsheetApp.getUi().alert(
     `Export ELEA Vidéo terminé !\n` +
     `${compteur} élèves synchronisés\n` +
-    `Trimestre ${trimestre}`
+    `${totalColonnes} indicateurs au total`
   );
 }
 
 // =========================================================================================
-// ENVOI QCM - RÉCUPÉRATION DE TOUTES LES COLONNES
+// ENVOI QCM - AVEC TRIMESTRE + SOUS-TITRES (à partir de la colonne F)
 // =========================================================================================
 function EnvoyerQCM(sheet, profCode) {
   const data = sheet.getDataRange().getValues();
   
+  // Identifier les lignes importantes
+  // Ligne 5 (index 4) : trimestres (T1, T2, T3)
+  // Ligne 4 (index 3) : sous-titres (QCM1, QCM2, ...)
+  // Ligne 6 et + (index 5+) : données élèves
+  
+  // Vérifier qu'on a assez de lignes
+  if (data.length < 6) {
+    SpreadsheetApp.getUi().alert("L'onglet QCM n'a pas assez de données !");
+    return;
+  }
+  
+  // Ligne des trimestres (index 4)
+  const trimestreHeaders = data[2];
+  
+  // Ligne des sous-titres (index 3)
+  const subHeaders = data[1];
+  
   Logger.log("=== DÉBUT SYNCHRONISATION QCM ===");
+  Logger.log("Onglet: " + sheet.getName());
   
   let compteur = 0;
+  let totalIndicateurs = 0;
   
-  // Parcourir toutes les lignes à partir de la ligne 3 (index 2)
-  for (let i = 2; i < data.length; i++) {
-    const prenom = data[i][0] ? data[i][0].toString().trim() : "";  // Colonne A
-    const nom = data[i][1] ? data[i][1].toString().trim() : "";     // Colonne B
+  // Commencer à la colonne F (index 5)
+  const COLONNE_DEPART = 5; // F = index 5 (A=0, B=1, C=2, D=3, E=4, F=5)
+  
+  // Parcourir toutes les lignes à partir de la ligne 6 (index 5)
+  for (let i = 3; i < data.length; i++) {
     
-    if (prenom === "" || nom === "") continue;
+    // Les colonnes A à E contiennent des informations sur l'élève
+    // A (index 0) : Prénom ou Nom ?
+    // B (index 1) : ?
+    // C (index 2) : ?
+    // D (index 3) : ?
+    // E (index 4) : ?
     
-    // Construction de l'objet donnees avec TOUTES les colonnes
+    // À adapter selon la structure réelle de votre onglet QCM
+    const nom = data[i][0] ? data[i][0].toString().trim() : "";  // Colonne A
+    const prenom = data[i][1] ? data[i][1].toString().trim() : "";     // Colonne B
+    
+    // Si pas de nom/prénom, on passe
+    if (prenom === "" && nom === "") continue;
+    
+    // Construction de l'objet donnees
     const donnees = {};
+    let nbIndicateurs = 0;
     
-    // Parcourir TOUTES les colonnes à partir de C (index 2) jusqu'à la fin
-    for (let j = 2; j < data[i].length; j++) {
-      const colonneLettre = indexToColumnLetter(j);
-      const cle = `col_${colonneLettre}`;
-      const valeur = data[i][j];
-      donnees[cle] = ToNum(valeur);
+    // Parcourir les colonnes à partir de F (index 5)
+    for (let j = COLONNE_DEPART; j < data[i].length; j++) {
+      
+      // Récupérer le trimestre (ligne 5, index 4)
+      const trimestre = trimestreHeaders[j] ? trimestreHeaders[j].toString().trim() : "";
+      
+      // Récupérer le sous-titre (ligne 4, index 3)
+      const sousTitre = subHeaders[j] ? subHeaders[j].toString().trim() : "";
+      
+      // Ne traiter que si on a les deux informations
+      if (trimestre && sousTitre) {
+        
+        // Nettoyer le trimestre (T1 -> t1, T2 -> t2)
+        const trimestreClean = trimestre
+          .replace(/\s+/g, '_')
+          .replace(/-/g, '_')
+          .toLowerCase();
+        
+        // Nettoyer le sous-titre (QCM1 -> qcm1, QCM2 -> qcm2)
+        const sousTitreClean = sousTitre
+          .replace(/\s+/g, '_')
+          .replace(/-/g, '_')
+          .toLowerCase();
+        
+        // Construire la clé finale: t1_qcm1, t2_qcm15, etc.
+        const cle = `${trimestreClean}_${sousTitreClean}`;
+        
+        // Récupérer la valeur
+        const valeur = data[i][j];
+        
+        // Stocker la valeur
+        donnees[cle] = ToNum(valeur);
+        nbIndicateurs++;
+      }
     }
+    
+    totalIndicateurs += nbIndicateurs;
+    
+    // LOG pour vérifier
+    Logger.log(`Élève ${compteur + 1}: ${nom} ${prenom} - ${nbIndicateurs} QCM`);
+    
+    // Afficher les 5 premières clés en exemple
+    const premieresCles = Object.keys(donnees).slice(0, 5);
+    Logger.log("  Exemple: " + JSON.stringify(premieresCles));
     
     const jsonBody = {
       p_nom: EscapeJson(nom),
@@ -255,24 +347,20 @@ function EnvoyerQCM(sheet, profCode) {
     compteur++;
   }
   
-  Logger.log(`=== SYNCHRONISATION TERMINÉE: ${compteur} élèves ===`);
+  Logger.log("=== RÉCAPITULATIF QCM ===");
+  Logger.log(`Total élèves: ${compteur}`);
+  Logger.log(`Total indicateurs QCM: ${totalIndicateurs}`);
+  Logger.log(`Moyenne: ${(totalIndicateurs / compteur).toFixed(1)} QCM/élève`);
   
   SpreadsheetApp.getUi().alert(
     `Export QCM terminé !\n` +
-    `${compteur} élèves synchronisés`
+    `${compteur} élèves synchronisés\n` +
+    `${totalIndicateurs} QCM au total`
   );
 }
 
-// Fonction utilitaire pour convertir un index en lettre de colonne (0=A, 1=B, ...)
-function indexToColumnLetter(index) {
-  let temp, letter = '';
-  while (index >= 0) {
-    temp = index % 26;
-    letter = String.fromCharCode(temp + 65) + letter;
-    index = Math.floor(index / 26) - 1;
-  }
-  return letter;
-}
+
+
 
 // =========================================================================================
 // GESTION DES ELEVES (Création automatique et récupération des codes)
