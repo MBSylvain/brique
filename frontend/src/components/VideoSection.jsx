@@ -40,7 +40,7 @@ export default function VideoSection({ eleaVideo, activeTab }) {
       // On exclut les QCM de cette section
       if (key.toLowerCase().includes("qcm")) return false;
 
-      return score === null || (typeof score === 'number' && score < 8);
+      return score === null ; //*|| (typeof score === 'number' && score < 8) DECOMMENTER POUR ACTIVER LE FILTRE SUR LES SCORES;
     })
     .map(([key, score]) => {
       // Nettoyage visuel : On retire le préfixe "tX_" du code pour l'affichage (ex: "t1_f0_v1" -> "f0_v1").
@@ -66,7 +66,7 @@ export default function VideoSection({ eleaVideo, activeTab }) {
       <div className="flex items-center justify-between px-2">
         <h2 className="text-2xl font-black text-white flex items-center gap-3">
           <div className="w-2 h-8 bg-rose-500 rounded-full"></div>
-          Vidéos à travailler
+          Vidéos à regarder
         </h2>
         <span className="px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-[10px] font-black text-rose-400 uppercase tracking-widest">
           {videosToWork.length} {videosToWork.length > 1 ? 'vidéos' : 'vidéo'}
@@ -85,37 +85,16 @@ export default function VideoSection({ eleaVideo, activeTab }) {
             <div className="flex items-center gap-4">
               
               <div className="flex-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                  Code Vidéo
-                </p>
-                <p className="text-lg font-black text-white leading-none">
+                <p className="text-lg text-uppercase font-black text-white leading-none">
                   {video.code}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                  Score
-                </p>
-                <p className={`text-lg font-black leading-none ${video.score === null ? 'text-amber-500' : 'text-rose-500'}`}>
+                <p className={`text-lg text-uppercase font-black leading-none ${video.score === null ? 'text-rose-500' : 'text-amber-500'  /* || (typeof score === 'number' && score < 8) */}`}>
                  {/* Score de la vidéo la formule  compare si score est null ou inférieur à 8 */}
                  {video.score !== null ? `${video.score}/10` : 'À faire'}
                 </p>
               </div>
-            </div>
-
-            <div className="mt-4 flex items-center gap-2 px-1">
-              
-              {video.score === null ? (
-                <>
-                  <AlertCircle className="w-3 h-3 text-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-tighter">Pas encore visionnée</span>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="w-3 h-3 text-rose-500" />
-                  <span className="text-[10px] font-bold text-rose-500/80 uppercase tracking-tighter">Priorité de révision</span>
-                </>
-              )}
             </div>
           </div>
         ))}

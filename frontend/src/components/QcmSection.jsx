@@ -30,7 +30,7 @@ export default function QcmSection({ qcmData, activeTab }) {
       }
 
       // Règle de filtrage : score < 8, null, ou "-"
-      return score === null || score === "-" || (typeof score === 'number' && score < 8);
+      return score === null || score === "-"; //* || (typeof score === 'number' && score < 8); //* à décommenter pour activer le filtre sur les scores
     })
     .map(([key, score]) => {
       // Nettoyage visuel (ex: "t1_qcm1" -> "QCM 1")
@@ -57,7 +57,7 @@ export default function QcmSection({ qcmData, activeTab }) {
       <div className="flex items-center justify-between px-2">
         <h2 className="text-2xl font-black text-white flex items-center gap-3">
           <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
-          QCM à retravailler
+          QCM
         </h2>
         <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black text-indigo-400 uppercase tracking-widest">
           {qcmsToWork.length} {qcmsToWork.length > 1 ? 'QCM' : 'QCM'}
@@ -65,11 +65,7 @@ export default function QcmSection({ qcmData, activeTab }) {
       </div>
 
       {/* Rappel des règles de notation */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Info className="w-12 h-12 text-indigo-400" />
-        </div>
-        
+      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">        
         <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
           Rappel de Notation
@@ -77,15 +73,15 @@ export default function QcmSection({ qcmData, activeTab }) {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Pas fait ("-")</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM non fait</p>
             <p className="text-sm font-black text-rose-500">-3 points</p>
           </div>
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Score &lt; 5</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM avec un score &lt; 5</p>
             <p className="text-sm font-black text-amber-500">-1 point</p>
           </div>
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Score &lt; 8</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM avec un score &lt; 8</p>
             <p className="text-sm font-black text-indigo-400">-1 point</p>
           </div>
         </div>
@@ -103,9 +99,6 @@ export default function QcmSection({ qcmData, activeTab }) {
             
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                  Référence
-                </p>
                 <p className="text-lg font-black text-white leading-none">
                   {qcm.code}
                 </p>
@@ -120,19 +113,7 @@ export default function QcmSection({ qcmData, activeTab }) {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-2 px-1">
-              {qcm.score === '-' || qcm.score === null ? (
-                <>
-                  <AlertTriangle className="w-3 h-3 text-rose-500" />
-                  <span className="text-[10px] font-bold text-rose-500/80 uppercase tracking-tighter">Action immédiate requise</span>
-                </>
-              ) : (
-                <>
-                  <ClipboardCheck className="w-3 h-3 text-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-tighter">Amélioration possible</span>
-                </>
-              )}
-            </div>
+            
           </div>
         ))}
       </div>
