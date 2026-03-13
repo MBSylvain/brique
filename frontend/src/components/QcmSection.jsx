@@ -88,11 +88,11 @@ export default function QcmSection({ qcmData, activeTab }) {
       </div>
 
       {/* Liste des QCM */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 xl:grid-cols-6">
         {qcmsToWork.map((qcm) => (
           <div
             key={qcm.code}
-            className="group relative bg-slate-900/50 border border-slate-800 p-5 rounded-[2rem] hover:border-indigo-500/30 transition-all overflow-hidden"
+            className="group relative bg-slate-900 border border-slate-800 p-5 rounded-[2rem] hover:border-indigo-500/30 transition-all overflow-hidden"
           >
             {/* Pattern de fond */}
             <div className="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-colors"></div>
