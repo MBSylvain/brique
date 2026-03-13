@@ -85,14 +85,14 @@ export default function VideoSection({ eleaVideo, activeTab }) {
             <div className="flex items-center gap-4">
               
               <div className="flex-1">
-                <p className="text-lg text-uppercase font-black text-white leading-none">
+                <p className="text-lg uppercase font-black text-white leading-none">
                   {video.code}
                 </p>
               </div>
               <div className="text-right">
-                <p className={`text-lg text-uppercase font-black leading-none ${video.score === null ? 'text-rose-500' : 'text-amber-500'  /* || (typeof score === 'number' && score < 8) */}`}>
+                <p className={`text-lg uppercase font-black leading-none ${video.score === null ? 'text-rose-500' : 'text-amber-500'  /* || (typeof score === 'number' && score < 8) */}`}>
                  {/* Score de la vidéo la formule  compare si score est null ou inférieur à 8 */}
-                 {video.score !== null ? `${video.score}/10` : 'À faire'}
+                 {video.score !== null ? `${video.score}/10` : 'À regarder'}
                 </p>
               </div>
             </div>
