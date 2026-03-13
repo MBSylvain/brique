@@ -64,7 +64,7 @@ export default function VideoSection({ eleaVideo, activeTab }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+        <h2 className="text-2xl font-black text-slate-600 flex items-center gap-3">
           <div className="w-2 h-8 bg-rose-500 rounded-full"></div>
           Vidéos à regarder
         </h2>
@@ -90,7 +90,7 @@ export default function VideoSection({ eleaVideo, activeTab }) {
                 </p>
               </div>
               <div className="text-right">
-                <p className={`text-lg uppercase font-black leading-none ${video.score === null ? 'text-rose-500' : 'text-amber-500'  /* || (typeof score === 'number' && score < 8) */}`}>
+                <p className={`text-lg font-black leading-none ${video.score === null ? 'text-rose-600' : 'text-amber-500'  /* || (typeof score === 'number' && score < 8) */}`}>
                  {/* Score de la vidéo la formule  compare si score est null ou inférieur à 8 */}
                  {video.score !== null ? `${video.score}/10` : 'À regarder'}
                 </p>

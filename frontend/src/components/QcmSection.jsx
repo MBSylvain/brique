@@ -55,7 +55,7 @@ export default function QcmSection({ qcmData, activeTab }) {
     <div className="space-y-6">
       {/* Header section QCM */}
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+        <h2 className="text-2xl font-black text-slate-600 flex items-center gap-3">
           <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
           QCM
         </h2>
@@ -104,9 +104,6 @@ export default function QcmSection({ qcmData, activeTab }) {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                  Résultat
-                </p>
                 <p className={`text-lg font-black leading-none ${qcm.score === '-' || qcm.score === null ? 'text-rose-500' : 'text-amber-500'}`}>
                   {qcm.score !== null && qcm.score !== "-" ? `${qcm.score}/10` : 'Pas fait'}
                 </p>
