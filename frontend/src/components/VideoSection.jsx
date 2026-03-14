@@ -62,9 +62,9 @@ export default function VideoSection({ eleaVideo, activeTab }) {
     return (
       <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-8 text-center">
         <div className="inline-flex p-3 bg-emerald-500/20 rounded-2xl mb-4">
-          <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+          <CheckCircle2 className="w-6 h-6 text-emerald-600" />
         </div>
-        <p className="text-emerald-200 font-bold uppercase tracking-widest text-xs">
+        <p className="text-emerald-600 font-bold uppercase tracking-widest text-xs">
           Toutes les vidéos sont validées !
         </p>
       </div>
@@ -74,18 +74,18 @@ export default function VideoSection({ eleaVideo, activeTab }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-black text-white uppercase flex items-center gap-3">
+        <h2 className="text-2xl font-black text-violet-500 uppercase flex items-center gap-3">
           <div className="w-2 h-8 bg-violet-500  rounded-full"></div>
           Vidéos
         </h2>
-        <span className="px-4 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-[10px] font-black text-violet-500 uppercase tracking-widest">
+        <span className="px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-500 uppercase tracking-widest">
           {videosToWork.length}{" "}
           {videosToWork.length > 1 ? "vidéos à valider" : "vidéo à valider"}
         </span>
       </div>
       {/**Rappel des règles de notation */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">
-        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <h3 className="text-xs font-black text-violet-500 uppercase tracking-widest mb-4 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
           Rappel de Notation
         </h3>

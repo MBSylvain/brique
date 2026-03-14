@@ -86,7 +86,6 @@ export default function Dashboard() {
       if (qcmError) throw qcmError;
       setQcm(qcmData || []);
       console.log("QCM data:", qcmData);
-
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
@@ -141,13 +140,9 @@ export default function Dashboard() {
         <div className="relative overflow-hidden bg-indigo-600 rounded-[2.5rem] p-8 sm:p-12 text-white shadow-2xl shadow-indigo-200">
           <div className="relative z-10">
             <h1 className="text-2xl sm:text-5xl font-black mb-4 leading-tight">
-              Ravi de vous revoir, <br />
-              <span className="text-indigo-200">{user.prenom} !</span>
+              Ravi de vous revoir{" "}
+              <span className="text-indigo-200">{user.prenom} </span> !
             </h1>
-            <p className="text-indigo-100 text-md font-medium opacity-90 max-w-xl">
-              Retrouvez ici l'ensemble de vos performances académiques et votre
-              organisation hebdomadaire.
-            </p>
           </div>
           {/* Decorative shapes */}
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
@@ -194,8 +189,8 @@ export default function Dashboard() {
             {/* Notes Section (2/3) */}
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-indigo-600 rounded-full"></div>
+                <h2 className="text-2xl font-black text-violet-500 uppercase flex items-center gap-3">
+                  <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
                   Résultats
                 </h2>
               </div>
@@ -319,11 +314,10 @@ export default function Dashboard() {
               )}
             </div>
 
-            
             {/* Planning Section */}
             <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3 px-2">
-                <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
+              <h2 className="text-2xl font-black text-violet-500 uppercase flex items-center gap-3 px-2">
+                <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
                 Planning
               </h2>
 
@@ -349,7 +343,7 @@ export default function Dashboard() {
                               prevKey: null,
                               nextKey: "cv",
                             },
-                            
+
                             {
                               displayName: "convergence",
                               dbKey: "cv",
@@ -425,7 +419,7 @@ export default function Dashboard() {
                               prevKey: "deriv",
                               nextKey: "conv",
                             },
-                            
+
                             {
                               displayName: "convexite",
                               dbKey: "conv",
@@ -433,7 +427,7 @@ export default function Dashboard() {
                               prevKey: "signe",
                               nextKey: "co",
                             },
-                            
+
                             {
                               displayName: "continuité",
                               dbKey: "co",
@@ -441,7 +435,7 @@ export default function Dashboard() {
                               prevKey: "conv",
                               nextKey: "integr",
                             },
-                            
+
                             {
                               displayName: "calcul d'intégrales",
                               dbKey: "integr",
@@ -456,7 +450,7 @@ export default function Dashboard() {
                               prevKey: "integr",
                               nextKey: "ed",
                             },
-                            
+
                             {
                               displayName: "equa Diff",
                               dbKey: "ed",
@@ -497,7 +491,6 @@ export default function Dashboard() {
                           title: "Espace",
                           color: "text-orange-500",
                           items: [
-                            
                             {
                               displayName: "droite",
                               dbKey: "dte",
@@ -543,7 +536,10 @@ export default function Dashboard() {
                               let display;
                               let statusColor = "";
 
-                              if (value !== "" && planning[0]?.[item.nextKey] !== "") {
+                              if (
+                                value !== "" &&
+                                planning[0]?.[item.nextKey] !== ""
+                              ) {
                                 display = (
                                   <div className="flex items-center justify-center gap-1">
                                     <span className="text-green-400">
@@ -554,10 +550,12 @@ export default function Dashboard() {
                                 );
                                 statusColor =
                                   "border-3 border-green-500/30 bg-green-500/5";
-                              } else if (value !== "" && planning[0]?.[item.nextKey] == ""
+                              } else if (
+                                value !== "" &&
+                                planning[0]?.[item.nextKey] == ""
                               ) {
                                 display = (
-                                    <span className="text-amber-500 font-medium italic text-[10px]">
+                                  <span className="text-amber-500 font-medium italic text-[10px]">
                                     {value} à valider
                                   </span>
                                 );
@@ -584,7 +582,7 @@ export default function Dashboard() {
                                   <p className="text-xs text-center font-bold text-slate-100">
                                     {display}
                                   </p>
-                                {/**   {item.prevKey && (
+                                  {/**   {item.prevKey && (
                                     <p className="text-[8px] text-center text-slate-600 mt-1">
                                       prérequis:{" "}
                                       {group.items.find(
@@ -623,7 +621,7 @@ export default function Dashboard() {
       {/* Footer */}
       <footer className="max-w-7xl mx-auto p-10 mt-10 text-center border-t border-slate-100">
         <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em]">
-          Révise Tes Maths &copy; 2026 
+          Révise Tes Maths &copy; 2026
         </p>
       </footer>
     </div>

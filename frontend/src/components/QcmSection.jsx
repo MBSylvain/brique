@@ -63,11 +63,11 @@ export default function QcmSection({ qcmData, activeTab }) {
     <div className="space-y-6">
       {/* Header section QCM */}
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+        <h2 className="text-2xl font-black text-violet-500 flex items-center gap-3">
           <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
           QCM
         </h2>
-        <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black text-violet-500 uppercase tracking-widest">
+        <span className="px-4 py-1.5 bg-violet-500/10 border border-violet-500/20 rounded-full text-[10px] font-black text-violet-500 uppercase tracking-widest">
           {qcmsToWork.length}{" "}
           {qcmsToWork.length > 1 ? "QCM à valider" : "QCM à valider"}
         </span>
@@ -75,7 +75,7 @@ export default function QcmSection({ qcmData, activeTab }) {
 
       {/* Rappel des règles de notation */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">
-        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <h3 className="text-xs font-black text-violet-500 uppercase tracking-widest mb-4 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
           Rappel de Notation
         </h3>
