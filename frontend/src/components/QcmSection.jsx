@@ -1,12 +1,17 @@
-import { ClipboardCheck, AlertTriangle, Info, CheckCircle2 } from "lucide-react";
+import {
+  ClipboardCheck,
+  AlertTriangle,
+  Info,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function QcmSection({ qcmData, activeTab }) {
   // 1. Détermination du trimestre actif
   const currentTabNumber = parseInt(activeTab.replace("T", ""));
-  
 
   // La structure dans la BDD est un objet avec un champ 'donnees' (jsonb)
-  const qcmRow = Array.isArray(qcmData) && qcmData.length > 0 ? qcmData[0] : null;
+  const qcmRow =
+    Array.isArray(qcmData) && qcmData.length > 0 ? qcmData[0] : null;
 
   if (!qcmRow || !qcmRow.donnees) {
     return null;
@@ -29,12 +34,15 @@ export default function QcmSection({ qcmData, activeTab }) {
         return false;
       }
 
-      // Règle de filtrage : score < 8, null, ou "-"
-      return score === null || score === "-"; //* || (typeof score === 'number' && score < 8); //* à décommenter pour activer le filtre sur les scores
+      // Règle de filtrage : score < 8, ou "0" pour les non faits
+      return score == "0" || (typeof score === "number" && score < 8); //* à décommenter pour activer le filtre sur les scores
     })
     .map(([key, score]) => {
       // Nettoyage visuel (ex: "t1_qcm1" -> "QCM 1")
-      const displayCode = key.replace(/^t[1-3]_/i, "").toUpperCase().replace("QCM", "QCM ");
+      const displayCode = key
+        .replace(/^t[1-3]_/i, "")
+        .toUpperCase()
+        .replace("QCM", "QCM ");
       return { code: displayCode, score };
     });
 
@@ -55,33 +63,40 @@ export default function QcmSection({ qcmData, activeTab }) {
     <div className="space-y-6">
       {/* Header section QCM */}
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-2xl font-black text-slate-600 flex items-center gap-3">
-          <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
+        <h2 className="text-2xl font-black text-white flex items-center gap-3">
+          <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
           QCM
         </h2>
-        <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-          {qcmsToWork.length} {qcmsToWork.length > 1 ? 'QCM' : 'QCM'}
+        <span className="px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black text-violet-500 uppercase tracking-widest">
+          {qcmsToWork.length}{" "}
+          {qcmsToWork.length > 1 ? "QCM à valider" : "QCM à valider"}
         </span>
       </div>
 
       {/* Rappel des règles de notation */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">        
+      <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 relative overflow-hidden group">
         <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" />
           Rappel de Notation
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM non fait</p>
+            <p className="text-[11px] font-bold text-white  mb-1">
+              QCM non fait
+            </p>
             <p className="text-sm font-black text-rose-500">-3 points</p>
           </div>
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM avec un score &lt; 5</p>
-            <p className="text-sm font-black text-amber-500">-1 point</p>
+            <p className="text-[11px] font-bold text-white uppercase mb-1">
+              QCM &lt; 5
+            </p>
+            <p className="text-sm font-black text-amber-500">-2 points</p>
           </div>
           <div className="bg-slate-950/50 p-3 rounded-2xl border border-slate-800/50">
-            <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">QCM avec un score &lt; 8</p>
+            <p className="text-[11px] font-bold text-white uppercase mb-1">
+              5 &le; QCM &lt; 8
+            </p>
             <p className="text-sm font-black text-indigo-400">-1 point</p>
           </div>
         </div>
@@ -96,7 +111,7 @@ export default function QcmSection({ qcmData, activeTab }) {
           >
             {/* Pattern de fond */}
             <div className="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-colors"></div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <p className="text-lg font-black text-white leading-none">
@@ -104,13 +119,13 @@ export default function QcmSection({ qcmData, activeTab }) {
                 </p>
               </div>
               <div className="text-right">
-                <p className={`text-lg font-black leading-none ${qcm.score === '-' || qcm.score === null ? 'text-rose-500' : 'text-amber-500'}`}>
-                  {qcm.score !== null && qcm.score !== "-" ? `${qcm.score}/10` : 'Pas fait'}
+                <p
+                  className={`text-lg font-black leading-none ${qcm.score == 0 ? "text-rose-500" : qcm.score < 5 ? "text-amber-500" : "text-indigo-400"}`}
+                >
+                  {qcm.score != 0 ? `${qcm.score}/10` : "non fait"}
                 </p>
               </div>
             </div>
-
-            
           </div>
         ))}
       </div>
