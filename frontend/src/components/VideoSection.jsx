@@ -60,11 +60,11 @@ export default function VideoSection({ eleaVideo, activeTab }) {
 
   if (videosToWork.length === 0) {
     return (
-      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-8 text-center">
-        <div className="inline-flex p-3 bg-emerald-500/20 rounded-2xl mb-4">
-          <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+      <div className="bg-violet-500/10 border border-violet-500/20 rounded-[2rem] p-8 text-center">
+        <div className="inline-flex p-3 bg-green-500/20 rounded-2xl mb-4">
+          <CheckCircle2 className="w-6 h-6 text-green-600" />
         </div>
-        <p className="text-emerald-600 font-bold uppercase tracking-widest text-xs">
+        <p className="text-violet-500 font-bold  tracking-widest text-xl">
           Toutes les vidéos sont validées !
         </p>
       </div>

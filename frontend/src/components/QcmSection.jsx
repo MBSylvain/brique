@@ -48,11 +48,11 @@ export default function QcmSection({ qcmData, activeTab }) {
 
   if (qcmsToWork.length === 0) {
     return (
-      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-[2rem] p-8 text-center">
-        <div className="inline-flex p-3 bg-indigo-500/20 rounded-2xl mb-4">
-          <CheckCircle2 className="w-6 h-6 text-indigo-400" />
+      <div className="bg-violet-500/10 border border-violet-500/20 rounded-[2rem] p-8 text-center">
+        <div className="inline-flex p-3 bg-green-500/20 rounded-2xl mb-4">
+          <CheckCircle2 className="w-6 h-6 text-green-600" />
         </div>
-        <p className="text-indigo-200 font-bold uppercase tracking-widest text-xs">
+        <p className="text-violet-500 font-bold  tracking-widest text-xl">
           Tous les QCM sont validés !
         </p>
       </div>
