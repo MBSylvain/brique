@@ -82,7 +82,7 @@ export default function StudentDetail() {
         throw planningError;
 
       setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : []);
-      
+
       // 4. Récupération des Elea video
       const { data: eleaVideoData, error: eleaVideoError } = await supabase
         .from("eleas_video")
@@ -101,7 +101,6 @@ export default function StudentDetail() {
 
       if (qcmError) throw qcmError;
       setQcm(qcmData);
-      
 
       // Debug : vérifier les données récupérées
       console.log("Planning data:", planningData);
@@ -325,7 +324,6 @@ export default function StudentDetail() {
                         value: currentNotes.brique_plus,
                         icon: "➕",
                       },
-                      
                     ].map((row, i) => (
                       <div
                         key={i}
@@ -359,7 +357,7 @@ export default function StudentDetail() {
             {/* Planning Section */}
             <div className="lg:col-span-6 space-y-6">
               <h2 className="text-2xl font-black text-white flex items-center gap-3 px-2">
-                <div className="w-2 h-8 text-black bg-amber-500 rounded-full"></div>
+                <div className="w-2 h-8 text-black bg-indigo-500 rounded-full"></div>
                 Planning
               </h2>
 
@@ -376,7 +374,7 @@ export default function StudentDetail() {
                       {[
                         {
                           title: "Suites",
-                          color: "text-emerald-400",
+                          color: "text-indigo-400",
                           items: [
                             {
                               displayName: "récurrence",
@@ -385,7 +383,7 @@ export default function StudentDetail() {
                               prevKey: null,
                               nextKey: "cv",
                             },
-                            
+
                             {
                               displayName: "convergence",
                               dbKey: "cv",
@@ -418,7 +416,7 @@ export default function StudentDetail() {
                         },
                         {
                           title: "Probabilités",
-                          color: "text-amber-400",
+                          color: "text-indigo-400",
                           items: [
                             {
                               displayName: "Proba cond",
@@ -461,7 +459,7 @@ export default function StudentDetail() {
                               prevKey: "deriv",
                               nextKey: "conv",
                             },
-                            
+
                             {
                               displayName: "convexite",
                               dbKey: "conv",
@@ -469,7 +467,7 @@ export default function StudentDetail() {
                               prevKey: "signe",
                               nextKey: "co",
                             },
-                            
+
                             {
                               displayName: "continuité",
                               dbKey: "co",
@@ -477,7 +475,7 @@ export default function StudentDetail() {
                               prevKey: "conv",
                               nextKey: "integr",
                             },
-                            
+
                             {
                               displayName: "calcul d'intégrales",
                               dbKey: "integr",
@@ -492,7 +490,7 @@ export default function StudentDetail() {
                               prevKey: "integr",
                               nextKey: "ed",
                             },
-                            
+
                             {
                               displayName: "equa Diff",
                               dbKey: "ed",
@@ -531,9 +529,8 @@ export default function StudentDetail() {
                         },
                         {
                           title: "Espace",
-                          color: "text-orange-500",
+                          color: "text-indigo-400",
                           items: [
-                            
                             {
                               displayName: "droite",
                               dbKey: "dte",
@@ -579,7 +576,10 @@ export default function StudentDetail() {
                               let display;
                               let statusColor = "";
 
-                              if (value !== "" && planning[0]?.[item.nextKey] !== "") {
+                              if (
+                                value !== "" &&
+                                planning[0]?.[item.nextKey] !== ""
+                              ) {
                                 display = (
                                   <div className="flex items-center justify-center gap-1">
                                     <span className="text-green-400">
@@ -590,10 +590,12 @@ export default function StudentDetail() {
                                 );
                                 statusColor =
                                   "border-green-500/30 bg-green-500/5 border-3";
-                              } else if (value !== "" && planning[0]?.[item.nextKey] == ""
+                              } else if (
+                                value !== "" &&
+                                planning[0]?.[item.nextKey] == ""
                               ) {
                                 display = (
-                                    <span className="text-amber-500 font-medium italic text-[10px]">
+                                  <span className="text-amber-500 font-medium italic text-[10px]">
                                     {value} à valider
                                   </span>
                                 );
@@ -620,7 +622,7 @@ export default function StudentDetail() {
                                   <p className="text-xs text-center font-bold text-slate-100">
                                     {display}
                                   </p>
-                                {/**   {item.prevKey && (
+                                  {/**   {item.prevKey && (
                                     <p className="text-[8px] text-center text-slate-600 mt-1">
                                       prérequis:{" "}
                                       {group.items.find(
@@ -662,7 +664,7 @@ export default function StudentDetail() {
       {/* Footer */}
       <footer className="max-w-7xl mx-auto p-10 mt-10 text-center border-t border-slate-800">
         <p className="text-xs font-bold text-slate-600 uppercase tracking-[0.3em]">
-          Révise Tes Maths &copy; 2026 
+          Révise Tes Maths &copy; 2026
         </p>
       </footer>
     </div>

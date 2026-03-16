@@ -189,8 +189,8 @@ export default function Dashboard() {
             {/* Notes Section (2/3) */}
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-2xl font-black text-violet-500 uppercase flex items-center gap-3">
-                  <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
+                <h2 className="text-2xl font-black text-indigo-500 uppercase flex items-center gap-3">
+                  <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
                   Résultats
                 </h2>
               </div>
@@ -316,8 +316,8 @@ export default function Dashboard() {
 
             {/* Planning Section */}
             <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-2xl font-black text-violet-500 uppercase flex items-center gap-3 px-2">
-                <div className="w-2 h-8 bg-violet-500 rounded-full"></div>
+              <h2 className="text-2xl font-black text-indigo-500 uppercase flex items-center gap-3 px-2">
+                <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
                 Planning
               </h2>
 
