@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import VideoSection from "./VideoSection";
 import QcmSection from "./QcmSection";
+import IBProgressionSection from "./Ibprogression";
 
 export default function StudentDetail() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function StudentDetail() {
   const [teacher, setTeacher] = useState(null);
   const [eleaVideo, setEleaVideo] = useState([]);
   const [qcm, setQcm] = useState([]);
+  const [ibProgression, setIBProgression] = useState([]);
 
   useEffect(() => {
     const staffData = localStorage.getItem("staff_data");
@@ -102,6 +104,13 @@ export default function StudentDetail() {
       if (qcmError) throw qcmError;
       setQcm(qcmData);
 
+      // 5. Récupération les données IB progression depuis sa propre table
+      const { data: ibProgressionData, error: ibProgressionError } =
+        await supabase.from("ib_progeleve").select("*").eq("eleve_id", id);
+
+      if (ibProgressionError) throw ibProgressionError;
+      setIBProgression(ibProgressionData);
+
       // Debug : vérifier les données récupérées
       console.log("Planning data:", planningData);
       console.log("Indicateurs:", planningData?.indicateurs);
@@ -109,6 +118,7 @@ export default function StudentDetail() {
       console.log("Eleves:", studentData);
       console.log("QCM data:", qcm);
       console.log("QCM data:", qcmData);
+      console.log("IB Progression data:", ibProgressionData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
     } finally {
@@ -575,11 +585,13 @@ export default function StudentDetail() {
                               // LOGIQUE D'AFFICHAGE
                               let display;
                               let statusColor = "";
+                              let isIBValidated = false;
 
                               if (
                                 value !== "" &&
                                 planning[0]?.[item.nextKey] !== ""
                               ) {
+                                isIBValidated = true;
                                 display = (
                                   <div className="flex items-center justify-center gap-1">
                                     <span className="text-green-400">
@@ -611,11 +623,18 @@ export default function StudentDetail() {
                                   "border-rose-500/30 bg-rose-500/5 border-3";
                               }
 
+                              const ibNote = ibProgression[0]?.donnees?.[item.label];
+
                               return (
                                 <div
                                   key={item.dbKey}
-                                  className={`bg-slate-900 p-3 rounded-xl border transition-all flex flex-col justify-center gap-1 group hover:scale-105 duration-200 ${statusColor}`}
+                                  className={`bg-slate-900 p-3 rounded-xl border transition-all flex flex-col justify-center gap-1 group hover:scale-105 duration-200 ${statusColor} relative`}
                                 >
+                                  {isIBValidated && ibNote && ibNote !== "" && (
+                                    <span className="absolute -top-2 -right-2 bg-indigo-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-lg border border-slate-900 z-10">
+                                      {ibNote}
+                                    </span>
+                                  )}
                                   <p className="text-[9px] wrap-break-word text-center font-bold text-slate-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">
                                     {item.displayName}
                                   </p>
@@ -657,6 +676,10 @@ export default function StudentDetail() {
           {/* Section QCM */}
           <div className="mt-10">
             <QcmSection qcmData={qcm} activeTab={activeTab} />
+          </div>
+          {/* Section IB Progression */}
+          <div className="mt-10">
+            <IBProgressionSection ibProgression={ibProgression} planning={planning} />
           </div>
         </div>
       </main>
