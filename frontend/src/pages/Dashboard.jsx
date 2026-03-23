@@ -85,7 +85,7 @@ export default function Dashboard() {
 
       if (qcmError) throw qcmError;
       setQcm(qcmData || []);
-      
+
 
       console.log("QCM data:", qcmData);
     } catch (error) {
@@ -177,11 +177,10 @@ export default function Dashboard() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === tab
+                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab
                     ? "bg-white text-indigo-600 shadow-xl shadow-indigo-500/10"
                     : "text-slate-500 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Trimestre {tab.slice(1)}
               </button>

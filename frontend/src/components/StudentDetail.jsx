@@ -16,6 +16,7 @@ import {
 import VideoSection from "./VideoSection";
 import QcmSection from "./QcmSection";
 import IBProgressionSection from "./Ibprogression";
+import IbProgressionSection from "./Ibprogression";
 
 export default function StudentDetail() {
   const navigate = useNavigate();
@@ -242,11 +243,10 @@ export default function StudentDetail() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${
-                  activeTab === tab
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                    : "text-slate-500 hover:text-white"
-                }`}
+                className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                  : "text-slate-500 hover:text-white"
+                  }`}
               >
                 Trimestre {tab.slice(1)}
               </button>
@@ -366,307 +366,7 @@ export default function StudentDetail() {
             </div>
 
             {/* Planning Section */}
-            <div className="lg:col-span-6 space-y-6">
-              <h2 className="text-2xl font-black text-white flex items-center gap-3 px-2">
-                <div className="w-2 h-8 text-black bg-indigo-500 rounded-full"></div>
-                Planning
-              </h2>
-
-              <div className="bg-slate-900/50 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
-                <div className="p-6 bg-slate-900 border-b border-slate-800">
-                  <p className="text-xs font-black text-slate-200 uppercase tracking-widest text-center">
-                    Planning Révisions IB
-                  </p>
-                </div>
-
-                <div className="divide-y divide-slate-900">
-                  {planning.length > 0 ? (
-                    <div className="p-8 space-y-10">
-                      {[
-                        {
-                          title: "Suites",
-                          color: "text-indigo-400",
-                          items: [
-                            {
-                              displayName: "récurrence",
-                              dbKey: "rec",
-                              label: "ib2",
-                              prevKey: null,
-                              nextKey: "cv",
-                            },
-
-                            {
-                              displayName: "convergence",
-                              dbKey: "cv",
-                              label: "ib6",
-                              prevKey: "rec",
-                              nextKey: "sg",
-                            },
-                            {
-                              displayName: "Suite Géo",
-                              dbKey: "sg",
-                              label: "b5",
-                              prevKey: "cv",
-                              nextKey: "python",
-                            },
-                            {
-                              displayName: "Python",
-                              dbKey: "python",
-                              label: "ib7",
-                              prevKey: "sg",
-                              nextKey: "lim",
-                            },
-                            {
-                              displayName: "Limites",
-                              dbKey: "lim",
-                              label: "ib7bis",
-                              prevKey: "python",
-                              nextKey: null,
-                            },
-                          ],
-                        },
-                        {
-                          title: "Probabilités",
-                          color: "text-indigo-400",
-                          items: [
-                            {
-                              displayName: "Proba cond",
-                              dbKey: "cond",
-                              label: "ib1",
-                              prevKey: null,
-                              nextKey: "bino",
-                            },
-                            {
-                              displayName: "Biniomiale",
-                              dbKey: "bino",
-                              label: "ib18",
-                              prevKey: "cond",
-                              nextKey: "va",
-                            },
-                            {
-                              displayName: "VA",
-                              dbKey: "va",
-                              label: "ib22",
-                              prevKey: "bino",
-                              nextKey: null,
-                            },
-                          ],
-                        },
-                        {
-                          title: "Fonctions",
-                          color: "text-indigo-400",
-                          items: [
-                            {
-                              displayName: "dériver",
-                              dbKey: "deriv",
-                              label: "ib3",
-                              prevKey: null,
-                              nextKey: "signe",
-                            },
-                            {
-                              displayName: "signe",
-                              dbKey: "signe",
-                              label: "ib4",
-                              prevKey: "deriv",
-                              nextKey: "conv",
-                            },
-
-                            {
-                              displayName: "convexite",
-                              dbKey: "conv",
-                              label: "ib9",
-                              prevKey: "signe",
-                              nextKey: "co",
-                            },
-
-                            {
-                              displayName: "continuité",
-                              dbKey: "co",
-                              label: "ib13",
-                              prevKey: "conv",
-                              nextKey: "integr",
-                            },
-
-                            {
-                              displayName: "calcul d'intégrales",
-                              dbKey: "integr",
-                              label: "ib19",
-                              prevKey: "co",
-                              nextKey: "aire",
-                            },
-                            {
-                              displayName: "aire",
-                              dbKey: "aire",
-                              label: "ib20",
-                              prevKey: "integr",
-                              nextKey: "ed",
-                            },
-
-                            {
-                              displayName: "equa Diff",
-                              dbKey: "ed",
-                              label: "ib23",
-                              prevKey: "aire",
-                              nextKey: "graph",
-                            },
-                            {
-                              displayName: "graphique",
-                              dbKey: "graph",
-                              label: "ib8",
-                              prevKey: "ed",
-                              nextKey: "lim_fn",
-                            },
-                            {
-                              displayName: "limites",
-                              dbKey: "lim_fn",
-                              label: "ib12",
-                              prevKey: "graph",
-                              nextKey: "trigo",
-                            },
-                            {
-                              displayName: "Fns trigos",
-                              dbKey: "trigo",
-                              label: "ib15",
-                              prevKey: "lim_fn",
-                            },
-                            {
-                              displayName: "inégalités",
-                              dbKey: "int_plus",
-                              label: "ib21",
-                              prevKey: "trigo",
-                              nextKey: null,
-                            },
-                          ],
-                        },
-                        {
-                          title: "Espace",
-                          color: "text-indigo-400",
-                          items: [
-                            {
-                              displayName: "droite",
-                              dbKey: "dte",
-                              label: "ib11",
-                              prevKey: null,
-                              nextKey: "plan",
-                            },
-                            {
-                              displayName: "Equation Plan",
-                              dbKey: "plan",
-                              label: "ib16",
-                              prevKey: "dte",
-                              nextKey: "v",
-                            },
-                            {
-                              displayName: "volume",
-                              dbKey: "v",
-                              label: "ib17",
-                              prevKey: "plan",
-                              nextKey: "vect",
-                            },
-                            {
-                              displayName: "vecteurs",
-                              dbKey: "vect",
-                              label: "ib10",
-                              prevKey: "v",
-                              nextKey: null,
-                            },
-                          ],
-                        },
-                      ].map((group) => (
-                        <div key={group.title} className="space-y-4">
-                          <h4
-                            className={`text-[12px] font-black uppercase tracking-[0.2em] ${group.color} opacity-80 px-1`}
-                          >
-                            {group.title}
-                          </h4>
-                          <div className="grid grid-cols-2 w-full sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
-                            {group.items.map((item) => {
-                              const value = planning[0]?.[item.dbKey];
-
-                              // LOGIQUE D'AFFICHAGE
-                              let display;
-                              let statusColor = "";
-                              let isIBValidated = false;
-                              if (
-                                value !== "" &&
-                                planning[0]?.[item.nextKey] !== ""
-                              ) {
-                                isIBValidated = true;
-                                display = (
-                                  <div className="flex items-center justify-center gap-1">
-                                    <span className="text-green-400">
-                                      {value}
-                                    </span>
-                                    <Check className="w-3 h-3 text-green-500" />
-                                  </div>
-                                );
-                                statusColor =
-                                  "border-green-500/30 bg-green-500/5 border-3";
-                              } else if (
-                                value !== "" &&
-                                planning[0]?.[item.nextKey] == ""
-                              ) {
-                                display = (
-                                  <span className="text-amber-500 font-medium italic text-[10px]">
-                                    {value} à valider
-                                  </span>
-                                );
-                                statusColor =
-                                  "border-amber-500/30 bg-amber-500/5 border-3";
-                              } else {
-                                display = (
-                                  <span className="text-rose-500 font-medium italic text-[10px]">
-                                    🔒
-                                  </span>
-                                );
-                                statusColor =
-                                  "border-rose-500/30 bg-rose-500/5 border-3";
-                              }
-
-                              const ibNote = ibProgression[0]?.donnees?.[item.label];
-
-                              return (
-                                <div
-                                  key={item.dbKey}
-                                  className={`bg-slate-900 p-3 rounded-xl border transition-all flex flex-col justify-center gap-1 group hover:scale-105 duration-200 ${statusColor} relative`}
-                                >
-                                  {isIBValidated && ibNote && ibNote !== "" && (
-                                    <span className="absolute -top-2 -right-2 bg-indigo-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-lg border border-slate-900 z-10">
-                                      {ibNote}
-                                    </span>
-                                  )}
-                                  <p className="text-[9px] wrap-break-word text-center font-bold text-slate-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">
-                                    {item.displayName}
-                                  </p>
-                                  <p className="text-xs text-center font-bold text-slate-100">
-                                    {display}
-                                  </p>
-                                  {/**   {item.prevKey && (
-                                    <p className="text-[8px] text-center text-slate-600 mt-1">
-                                      prérequis:{" "}
-                                      {group.items.find(
-                                        (i) => i.dbKey === item.prevKey,
-                                      )?.displayName || item.prevKey}
-                                    </p>
-                                  )} */}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-10 text-center">
-                      <Calendar className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-                      <p className="text-xs font-bold text-slate-600 uppercase tracking-widest leading-loose">
-                        Aucun planning <br /> pour le moment
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <IbProgressionSection ibProgression={ibProgression} planning={planning} />
           </div>
 
           {/* Section Vidéos ELEAS */}
@@ -679,7 +379,7 @@ export default function StudentDetail() {
           </div>
           {/* Section IB Progression */}
           <div className="mt-10">
-            <IBProgressionSection ibProgression={ibProgression} planning={planning} />
+            {/*<IBProgressionSection ibProgression={ibProgression} planning={planning} />*/}
           </div>
         </div>
       </main>

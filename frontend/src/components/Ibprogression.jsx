@@ -99,7 +99,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
   ];
 
   return (
-    <div className="space-y-16">
+    <div className="lg:col-span-6 space-y-6">
 
       {/* --- SECTION PLANNING GRAPHIQUE --- */}
       <div className="space-y-6">
@@ -130,7 +130,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
 
                         // LOGIQUE DE PROGRESSION (NEXT/PREV KEYS) :
                         // On utilise 'prevKey' et 'nextKey' pour définir l'ordre des chapitres.
-                        
+
                         // 1. Vérifie si le pré-requis (le chapitre précédent défini par 'prevKey') est validé
                         const prevItem = group.items.find((i) => i.dbKey === item.prevKey);
                         const isPrevValidated = !item.prevKey || (prevItem && isKeyValidated(prevItem.label));
@@ -143,10 +143,10 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
                         // ÉTATS DE LA NOTION :
                         // isDone : Le chapitre est terminé et acquis (la note est >= 1)
                         const isDone = numericNote >= 1;
-                        
+
                         // isCurrent : Le chapitre est "débloqué" mais pas encore validé (Précédent fini, mais note < 1)
                         const isCurrent = !isDone && isPrevValidated;
-                        
+
                         // isLocked : Le chapitre est bloqué par un cadenas (Le pré-requis précédent n'est pas encore validé)
                         const isLocked = !isPrevValidated;
 
