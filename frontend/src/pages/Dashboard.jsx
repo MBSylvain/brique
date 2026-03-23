@@ -85,6 +85,8 @@ export default function Dashboard() {
 
       if (qcmError) throw qcmError;
       setQcm(qcmData || []);
+      
+
       console.log("QCM data:", qcmData);
     } catch (error) {
       console.error("Erreur lors de la récupération des données:", error);
@@ -101,6 +103,7 @@ export default function Dashboard() {
   const currentNotes = notes.find((n) => n.trimestre === activeTab);
 
   if (!user) return null;
+
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -531,8 +534,6 @@ export default function Dashboard() {
                           <div className="grid grid-cols-2 w-full sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
                             {group.items.map((item) => {
                               const value = planning[0]?.[item.dbKey];
-
-                              // LOGIQUE D'AFFICHAGE
                               let display;
                               let statusColor = "";
 

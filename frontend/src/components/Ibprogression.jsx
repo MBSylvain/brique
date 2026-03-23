@@ -1,5 +1,6 @@
 import React from "react";
 import { Check, Calendar } from "lucide-react";
+import brickImage from "../assets/une_brique.png";
 
 const IBProgression = ({ ibProgression, planning = [] }) => {
   // 1. Vérification initiale : on s'assure que les données existent et ne sont pas vides
@@ -9,22 +10,25 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
 
   // 2. Extraction du JSON contenant les clés/valeurs de l'IB Progression
   // On prend le premier élément du tableau car on s'attend à une seule ligne retournée par élève
-  const ibDonnees = ibProgression[0]?.donnees || {};
+  const ibDonnees = Object.fromEntries(
+    Object.entries(ibProgression[0]?.donnees || {}).map(([k, v]) => [
+      k.split("_")[0].toLowerCase(),
+      v,
+    ])
+  );
 
   // Fonction utilitaire pour trouver la note sans tenir compte de la casse (ex: "IB2" vs "ib2")
   // La BDD stocke parfois des suffixes (ex: "ib2_rc" au lieu de juste "ib2")
   const trouverNoteIB = (labelRecherche) => {
     if (!labelRecherche) return null;
-    const labelRechercheLower = labelRecherche.toLowerCase();
+    return ibDonnees[labelRecherche.toLowerCase()] || null;
+  };
 
-    const cleTrouvee = Object.keys(ibDonnees).find(
-      (cle) => {
-        const cleLower = cle.toLowerCase();
-        // Soit c'est "ib2" exactement, soit ça commence par "ib2_"
-        return cleLower === labelRechercheLower || cleLower.startsWith(labelRechercheLower + "_");
-      }
-    );
-    return cleTrouvee ? ibDonnees[cleTrouvee] : null;
+  // Helper pour vérifier si un item est validé (note >= 1)
+  const isKeyValidated = (label) => {
+    const note = trouverNoteIB(label);
+    const num = parseFloat(note);
+    return !isNaN(num) && num >= 1;
   };
 
   // 3. Traitement et formatage des données
@@ -32,7 +36,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
   const ibList = Object.entries(ibDonnees)
     // On ignore les éléments qui n'ont pas de valeur (ex: non évalués) ou qui sont vides
     .filter(([key, value]) => value !== null && value !== "")
-    .map(([key, value]) => ({ key, value }));
+    .map(([key, value]) => ({ key: key.split("_")[0], value }));
 
   // Si après ce filtrage il n'y a plus aucun élément à afficher, on montre un état "vide" stylisé
   if (ibList.length === 0 && planning.length === 0) {
@@ -96,7 +100,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
 
   return (
     <div className="space-y-16">
-      
+
       {/* --- SECTION PLANNING GRAPHIQUE --- */}
       <div className="space-y-6">
         <div className="flex items-center justify-between px-2">
@@ -117,43 +121,74 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
                     </h4>
                     <div className="grid grid-cols-2 w-full sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
                       {group.items.map((item) => {
+                        // 'value' (planning[0]?.[item.dbKey]) correspond à l'état renseigné dans le planning général (ex: "S1", "S2")
                         const value = planning[0]?.[item.dbKey];
 
-                        // LOGIQUE D'AFFICHAGE
+                        // 'ibNote' correspond à la note numérique (0 à 7) récupérée dans ib_progeleve
+                        const ibNote = trouverNoteIB(item.label);
+                        const numericNote = parseFloat(ibNote);
+
+                        // LOGIQUE DE PROGRESSION (NEXT/PREV KEYS) :
+                        // On utilise 'prevKey' et 'nextKey' pour définir l'ordre des chapitres.
+                        
+                        // 1. Vérifie si le pré-requis (le chapitre précédent défini par 'prevKey') est validé
+                        const prevItem = group.items.find((i) => i.dbKey === item.prevKey);
+                        const isPrevValidated = !item.prevKey || (prevItem && isKeyValidated(prevItem.label));
+
+                        // 2. Vérifie si le chapitre suivant (défini par 'nextKey') a commencé (a une note)
+                        const nextItem = group.items.find((i) => i.dbKey === item.nextKey);
+                        const nextNote = nextItem ? trouverNoteIB(nextItem.label) : null;
+                        const isNextStarted = nextNote !== null && nextNote !== "";
+
+                        // ÉTATS DE LA NOTION :
+                        // isDone : Le chapitre est terminé et acquis (la note est >= 1)
+                        const isDone = numericNote >= 1;
+                        
+                        // isCurrent : Le chapitre est "débloqué" mais pas encore validé (Précédent fini, mais note < 1)
+                        const isCurrent = !isDone && isPrevValidated;
+                        
+                        // isLocked : Le chapitre est bloqué par un cadenas (Le pré-requis précédent n'est pas encore validé)
+                        const isLocked = !isPrevValidated;
+
                         let display;
                         let statusColor = "";
                         let isIBValidated = false;
 
-                        const ibNote = trouverNoteIB(item.label);
-
-                        if (value !== "" && planning[0]?.[item.nextKey] !== "") {
-                          isIBValidated = true;
-                          display = (
-                            <div className="flex items-center justify-center gap-1">
-                              <span className="text-green-400">{value}</span>
-                              <Check className="w-3 h-3 text-green-500" />
-                              {ibNote && (
-                                <span className="ml-1 bg-indigo-500/20 text-green-400 text-[10px] font-black px-1.5 py-0.5 rounded-md border border-indigo-500/30">
-                                  {ibNote}
-                                </span>
-                              )}
-                            </div>
-                          );
-                          statusColor = "border-green-500/30 bg-green-500/5 border-3";
-                        } else if (value !== "" && planning[0]?.[item.nextKey] == "") {
-                          display = (
-                            <span className="text-amber-500 font-medium italic text-[10px]">
-                              {value} à valider
-                            </span>
-                          );
-                          statusColor = "border-amber-500/30 bg-amber-500/5 border-3";
-                        } else {
+                        if (isLocked) {
                           display = (
                             <span className="text-rose-500 font-medium italic text-[10px]">
                               🔒
                             </span>
                           );
                           statusColor = "border-rose-500/30 bg-rose-500/5 border-3";
+                        } else if (isDone) {
+                          isIBValidated = true;
+                          display = (
+                            <div className="flex flex-col items-center justify-center gap-1">
+                              <span className="text-green-400 flex items-center gap-1">
+                                {value} <Check className="w-3 h-3 text-green-500" />
+                              </span>
+                              <div className="text-green-400 flex items-center gap-1">
+                                {/* {ibNote} {ibNote > 1 ? "briques" : "brique"} */}
+                                {ibNote} <img
+                                  src={brickImage}
+                                  alt="Brique IB"
+                                  style={{ width: 40, height: 40 }}
+                                />
+                              </div>
+                            </div>
+                          );
+                          statusColor = "border-green-500/30 bg-green-500/5 border-3";
+                        } else if (isCurrent) {
+                          display = (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="text-amber-500 font-medium italic text-[10px]">
+                                {value} à valider
+                              </span>
+
+                            </div>
+                          );
+                          statusColor = "border-amber-500/30 bg-amber-500/5 border-3";
                         }
 
                         return (
@@ -186,50 +221,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
         </div>
       </div>
 
-      {/* --- GRILLE DES RESULTATS DÉTAILLÉS --- */}
-      <div className="space-y-6 pt-4">
-        <div className="flex items-center justify-between px-2">
-          <h2 className="text-xl font-bold text-slate-400 flex items-center gap-3">
-            Détails IB Progression
-          </h2>
-          
-          {/* Badge compteur affichant le nombre total d'éléments validés */}
-          <span className="px-4 py-1.5 bg-violet-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-            {ibList.length} {ibList.length > 1 ? "éléments" : "élément"}
-          </span>
-        </div>
 
-        {/* Responsive : 1 col (mobile), 2 cols (tablette), 3 cols (ordi), 4 cols (grand écran) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {ibList.map((item, index) => (
-            <div
-              key={index}
-              // Style de la carte : fond sombre, bords très arrondis (2rem), effet lumineux au survol (hover)
-              className="group relative bg-slate-900 border border-slate-800 p-5 rounded-[2rem] hover:border-indigo-500/30 transition-all overflow-hidden"
-            >
-              {/* Effet lumineux (blob flouté) en haut à droite de chaque carte */}
-              <div className="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-colors"></div>
-              
-              {/* Contenu interne de la carte (Clé à gauche, Valeur à droite) */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  {/* On remplace les underscores par des espaces pour un affichage plus propre, ex: "ib_1" -> "ib 1" */}
-                  <p className="text-sm font-black text-white leading-tight uppercase">
-                    {item.key.replace(/_/g, " ")}
-                  </p>
-                </div>
-                
-                <div className="text-right">
-                  {/* Affichage du score ou statut */}
-                  <span className="text-lg font-black text-indigo-400">
-                    {item.value}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };

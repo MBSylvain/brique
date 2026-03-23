@@ -145,6 +145,7 @@ export default function StudentDetail() {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-slate-950 font-sans">
       {/* Header */}
@@ -586,7 +587,6 @@ export default function StudentDetail() {
                               let display;
                               let statusColor = "";
                               let isIBValidated = false;
-
                               if (
                                 value !== "" &&
                                 planning[0]?.[item.nextKey] !== ""
