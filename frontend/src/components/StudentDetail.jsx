@@ -257,7 +257,7 @@ export default function StudentDetail() {
             {/* Notes Section */}
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center justify-between px-2">
-                <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                <h2 className="text-2xl font-black text-indigo-400 flex items-center gap-3">
                   <div className="w-2 h-8 bg-indigo-500 rounded-full"></div>
                   Résultats
                 </h2>
