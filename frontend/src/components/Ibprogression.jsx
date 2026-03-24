@@ -110,7 +110,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
           </h2>
         </div>
 
-        <div className="bg-slate-900/50 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
+        <div className="bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
           <div className="divide-y divide-slate-900">
             {planning.length > 0 ? (
               <div className="p-8 space-y-10">
