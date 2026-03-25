@@ -23,7 +23,6 @@ export default function StudentDetail() {
   const { id } = useParams();
   const [student, setStudent] = useState(null);
   const [notes, setNotes] = useState([]);
-  const [planning, setPlanning] = useState([]);
   const [activeTab, setActiveTab] = useState("T1");
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState(null);
@@ -74,17 +73,9 @@ export default function StudentDetail() {
 
       setNotes(flattenedNotes);
 
-      // 3. Récupérer le planning
-      const { data: planningData, error: planningError } = await supabase
-        .from("planning")
-        .select("*")
-        .eq("eleve_id", id) // Utiliser l'id de l'élève, pas userType.id
-        .single();
+      // 3. (Supprimé) Récupérer le planning via sa propre table
+      // setPlanning(...) - Désormais géré via ib_progeleve
 
-      if (planningError && planningError.code !== "PGRST116")
-        throw planningError;
-
-      setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : []);
 
       // 4. Récupération des Elea video
       const { data: eleaVideoData, error: eleaVideoError } = await supabase
@@ -113,8 +104,6 @@ export default function StudentDetail() {
       setIBProgression(ibProgressionData);
 
       // Debug : vérifier les données récupérées
-      console.log("Planning data:", planningData);
-      console.log("Indicateurs:", planningData?.indicateurs);
       console.log("Elea video:", eleaVideoData);
       console.log("Eleves:", studentData);
       console.log("QCM data:", qcm);
@@ -366,7 +355,7 @@ export default function StudentDetail() {
             </div>
 
             {/* Planning Section */}
-            <IbProgressionSection ibProgression={ibProgression} planning={planning} />
+            <IbProgressionSection ibProgression={ibProgression} />
           </div>
 
           {/* Section Vidéos ELEAS */}

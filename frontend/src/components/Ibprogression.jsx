@@ -2,7 +2,7 @@ import React from "react";
 import { Check, Calendar } from "lucide-react";
 import brickImage from "../assets/une_brique.png";
 
-const IBProgression = ({ ibProgression, planning = [] }) => {
+const IBProgression = ({ ibProgression }) => {
   // 1. Vérification initiale : on s'assure que les données existent et ne sont pas vides
   if (!ibProgression || ibProgression.length === 0) {
     return null; // Ne rien afficher si aucune ligne de progression n'est retournée par la base
@@ -39,7 +39,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
     .map(([key, value]) => ({ key: key.split("_")[0], value }));
 
   // Si après ce filtrage il n'y a plus aucun élément à afficher, on montre un état "vide" stylisé
-  if (ibList.length === 0 && planning.length === 0) {
+  if (ibList.length === 0) {
     return (
       <div className="bg-slate-900/30 rounded-[2rem] p-16 text-center border border-slate-800 border-dashed">
         <p className="text-slate-600 font-bold">Aucune donnée IB disponible</p>
@@ -79,11 +79,11 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
         { displayName: "continuité", dbKey: "co", label: "ib13", prevKey: "conv", nextKey: "integr" },
         { displayName: "calcul d'intégrales", dbKey: "integr", label: "ib19", prevKey: "co", nextKey: "aire" },
         { displayName: "aire", dbKey: "aire", label: "ib20", prevKey: "integr", nextKey: "ed" },
-        { displayName: "equa Diff", dbKey: "ed", label: "ib23", prevKey: "aire", nextKey: "graph" },
-        { displayName: "graphique", dbKey: "graph", label: "ib8", prevKey: "ed", nextKey: "lim_fn" },
-        { displayName: "limites", dbKey: "lim_fn", label: "ib12", prevKey: "graph", nextKey: "trigo" },
-        { displayName: "Fns trigos", dbKey: "trigo", label: "ib15", prevKey: "lim_fn", nextKey: null },
-        { displayName: "inégalités", dbKey: "int_plus", label: "ib21", prevKey: "trigo", nextKey: null },
+        { displayName: "equa Diff", dbKey: "ed", label: "ib23", prevKey: "aire", nextKey: null },
+        { displayName: "graphique", dbKey: "graph", label: "ib8", prevKey: null, nextKey: null },
+        { displayName: "limites", dbKey: "lim_fn", label: "ib12", prevKey: null, nextKey: null },
+        { displayName: "Fns trigos", dbKey: "trigo", label: "ib15", prevKey: null, nextKey: null },
+        { displayName: "inégalités", dbKey: "int_plus", label: "ib21", prevKey: null, nextKey: null },
       ],
     },
     {
@@ -93,7 +93,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
         { displayName: "droite", dbKey: "dte", label: "ib11", prevKey: null, nextKey: "plan" },
         { displayName: "Equation Plan", dbKey: "plan", label: "ib16", prevKey: "dte", nextKey: "v" },
         { displayName: "volume", dbKey: "v", label: "ib17", prevKey: "plan", nextKey: "vect" },
-        { displayName: "vecteurs", dbKey: "vect", label: "ib10", prevKey: "v", nextKey: null },
+        { displayName: "vecteurs", dbKey: "vect", label: "ib10", prevKey: null, nextKey: null },
       ],
     },
   ];
@@ -112,7 +112,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden min-h-[400px]">
           <div className="divide-y divide-slate-900">
-            {planning.length > 0 ? (
+            {ibProgression.length > 0 ? (
               <div className="p-8 space-y-10">
                 {planningGroups.map((group) => (
                   <div key={group.title} className="space-y-4">
@@ -121,39 +121,35 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
                     </h4>
                     <div className="grid grid-cols-2 w-full sm:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6">
                       {group.items.map((item) => {
-                        // 'value' (planning[0]?.[item.dbKey]) correspond à l'état renseigné dans le planning général (ex: "S1", "S2")
-                        const value = planning[0]?.[item.dbKey];
+                        // 'value' (récupéré via dbKey, ex: "rec") correspond à l'état (ex: "S1", "S2") désormais srocké dans ib_progeleve
+                        const value = trouverNoteIB(item.dbKey);
 
                         // 'ibNote' correspond à la note numérique (0 à 7) récupérée dans ib_progeleve
                         const ibNote = trouverNoteIB(item.label);
                         const numericNote = parseFloat(ibNote);
 
-                        // LOGIQUE DE PROGRESSION (NEXT/PREV KEYS) :
-                        // On utilise 'prevKey' et 'nextKey' pour définir l'ordre des chapitres.
+                        // LOGIQUE DE PROGRESSION :
+                        const isStandalone = !item.prevKey && !item.nextKey;
+                        const isEmpty = ibNote === null || ibNote === "" || isNaN(numericNote);
 
                         // 1. Vérifie si le pré-requis (le chapitre précédent défini par 'prevKey') est validé
                         const prevItem = group.items.find((i) => i.dbKey === item.prevKey);
                         const isPrevValidated = !item.prevKey || (prevItem && isKeyValidated(prevItem.label));
 
-                        // 2. Vérifie si le chapitre suivant (défini par 'nextKey') a commencé (a une note)
-                        const nextItem = group.items.find((i) => i.dbKey === item.nextKey);
-                        const nextNote = nextItem ? trouverNoteIB(nextItem.label) : null;
-                        const isNextStarted = nextNote !== null && nextNote !== "";
+                        // 2. ÉTATS DE LA NOTION :
+                        // isDone : Validé (Vert)
+                        const isDone = numericNote >= 1 || (isStandalone && numericNote > 0);
 
-                        // ÉTATS DE LA NOTION :
-                        // isDone : Le chapitre est terminé et acquis (la note est >= 1)
-                        const isDone = numericNote >= 1;
+                        // isLocked : Bloqué (Rose/Cadenas)
+                        const isLocked = !isDone && (!isPrevValidated || (isStandalone && isEmpty));
 
-                        // isCurrent : Le chapitre est "débloqué" mais pas encore validé (Précédent fini, mais note < 1)
-                        const isCurrent = !isDone && isPrevValidated;
-
-                        // isLocked : Le chapitre est bloqué par un cadenas (Le pré-requis précédent n'est pas encore validé)
-                        const isLocked = !isPrevValidated;
+                        // isCurrent : Débloqué / À valider (Orange)
+                        const isCurrent = !isDone && !isLocked;
 
                         let display;
                         let statusColor = "";
                         let isIBValidated = false;
-
+                        // si le chapitre precedent n'est pas terminé et acquis (la note est < 1)
                         if (isLocked) {
                           display = (
                             <span className="text-rose-500 font-medium italic text-[10px]">
@@ -161,6 +157,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
                             </span>
                           );
                           statusColor = "border-rose-500/30 bg-rose-500/5 border-3";
+                          // si le chapitre precedent est terminé et acquis (la note est >= 1)
                         } else if (isDone) {
                           isIBValidated = true;
                           display = (
@@ -179,6 +176,7 @@ const IBProgression = ({ ibProgression, planning = [] }) => {
                             </div>
                           );
                           statusColor = "border-green-500/30 bg-green-500/5 border-3";
+                          // si le chapitre precedent est terminé et acquis (la note est >= 1)
                         } else if (isCurrent) {
                           display = (
                             <div className="flex items-center justify-center gap-1">

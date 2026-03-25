@@ -20,7 +20,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [notes, setNotes] = useState([]);
-  const [planning, setPlanning] = useState([]);
   const [activeTab, setActiveTab] = useState("T1");
   const [loading, setLoading] = useState(true);
   const [eleaVideo, setEleaVideo] = useState([]);
@@ -59,16 +58,9 @@ export default function Dashboard() {
 
       setNotes(flattenedNotes);
 
-      // 2. Récupérer le planning
-      const { data: planningData, error: planningError } = await supabase
-        .from("planning")
-        .select("*")
-        .eq("eleve_id", userData.id)
-        .single(); // Un seul planning par élève
+      // 2. (Supprimé) Récupérer le planning via sa propre table
+      // setPlanning(...) - Désormais géré via ib_progeleve
 
-      if (planningError && planningError.code !== "PGRST116")
-        throw planningError;
-      setPlanning(planningData?.indicateurs ? [planningData.indicateurs] : []);
 
       // 3. Récupérer les données vidéos
       const { data: eleaVideoData, error: eleaVideoError } = await supabase
@@ -328,8 +320,6 @@ export default function Dashboard() {
             {/* Planning Section */}
             <IbProgressionSection
               ibProgression={ibProgression}
-              planning={planning}
-              activeTab={activeTab}
             />
           </div>
 
