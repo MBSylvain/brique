@@ -184,7 +184,10 @@ const IBProgression = ({ ibProgression }) => {
                           display = (
                             <div className="flex items-center justify-center gap-1">
                               <span className="text-amber-500 font-medium italic text-[10px] uppercase">
-                                {value} {iblabel} à valider
+                                {iblabel} 
+                              </span>
+                              <span className="text-amber-500 font-medium italic text-[10px] ">
+                                {value} à valider
                               </span>
 
                             </div>
