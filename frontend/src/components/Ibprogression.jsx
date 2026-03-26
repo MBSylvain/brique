@@ -123,10 +123,12 @@ const IBProgression = ({ ibProgression }) => {
                       {group.items.map((item) => {
                         // 'value' (récupéré via dbKey, ex: "rec") correspond à l'état (ex: "S1", "S2") désormais srocké dans ib_progeleve
                         const value = trouverNoteIB(item.dbKey);
-
+                        
                         // 'ibNote' correspond à la note numérique (0 à 7) récupérée dans ib_progeleve
                         const ibNote = trouverNoteIB(item.label);
                         const numericNote = parseFloat(ibNote);
+                        // iblabel
+                        const iblabel = item.label;
 
                         // LOGIQUE DE PROGRESSION :
                         const isStandalone = !item.prevKey && !item.nextKey;
@@ -152,8 +154,8 @@ const IBProgression = ({ ibProgression }) => {
                         // si le chapitre precedent n'est pas terminé et acquis (la note est < 1)
                         if (isLocked) {
                           display = (
-                            <span className="text-rose-500 font-medium italic text-[10px]">
-                              🔒
+                            <span className="text-rose-500 font-medium italic text-[10px] uppercase">
+                              {iblabel}🔒
                             </span>
                           );
                           statusColor = "border-rose-500/30 bg-rose-500/5 border-3";
@@ -162,8 +164,9 @@ const IBProgression = ({ ibProgression }) => {
                           isIBValidated = true;
                           display = (
                             <div className="flex flex-col items-center justify-center gap-1">
-                              <span className="text-green-400 flex items-center gap-1">
-                                {value} <Check className="w-3 h-3 text-green-500" />
+                              <span className="text-green-400 uppercase flex items-center gap-1">
+                                {value} {iblabel} <Check className="w-3 h-3 text-green-500" />
+                               
                               </span>
                               <div className="text-green-400 flex items-center gap-1">
                                 {/* {ibNote} {ibNote > 1 ? "briques" : "brique"} */}
@@ -180,8 +183,8 @@ const IBProgression = ({ ibProgression }) => {
                         } else if (isCurrent) {
                           display = (
                             <div className="flex items-center justify-center gap-1">
-                              <span className="text-amber-500 font-medium italic text-[10px]">
-                                {value} à valider
+                              <span className="text-amber-500 font-medium italic text-[10px] uppercase">
+                                {value} {iblabel} à valider
                               </span>
 
                             </div>
