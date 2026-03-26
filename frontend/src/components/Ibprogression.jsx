@@ -148,11 +148,14 @@ const IBProgression = ({ ibProgression }) => {
                         // isCurrent : Débloqué / À valider (Orange)
                         const isCurrent = !isDone && !isLocked;
 
+                        //  isfacultatif : si prevKey et nextKey sont null
+                        const isFacultatif = !item.prevKey && !item.nextKey;
+
                         let display;
                         let statusColor = "";
                         let isIBValidated = false;
                         // si le chapitre precedent n'est pas terminé et acquis (la note est < 1)
-                        if (isLocked) {
+                        if (isLocked && !isStandalone) {
                           display = (
                             <span className="text-rose-500 font-medium italic text-[10px] uppercase">
                               {iblabel}🔒
@@ -193,6 +196,19 @@ const IBProgression = ({ ibProgression }) => {
                             </div>
                           );
                           statusColor = "border-amber-500/30 bg-amber-500/5 border-3";
+                        } else if (isStandalone && isLocked) {
+                          display = (
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="text-amber-500 font-medium italic text-[10px] uppercase">
+                                {iblabel} 
+                              </span>
+                              <span className="text-amber-500 font-medium italic text-[10px] ">
+                                {value} à valider
+                              </span>
+
+                            </div>
+                          );
+                          statusColor = "border-amber-500/30 bg-amber-500/5 border-3";
                         }
 
                         return (
@@ -201,7 +217,9 @@ const IBProgression = ({ ibProgression }) => {
                             className={`bg-slate-900 p-3 rounded-xl border transition-all flex flex-col justify-center gap-1 group hover:scale-105 duration-200 ${statusColor} relative`}
                           >
                             <p className="text-[9px] wrap-break-word text-center font-bold text-slate-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">
-                              {item.displayName}
+                              {item.displayName} <br />
+                              {/* si le chapitre est facultatif, afficher "Facultatif" */}
+                              <span className="text-slate-500 font-medium italic text-[8px] ">{isFacultatif ? "Facultatif" : ""}</span>
                             </p>
                             <p className="text-xs text-center font-bold text-slate-100">
                               {display}
