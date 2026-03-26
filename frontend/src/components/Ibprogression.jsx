@@ -67,6 +67,7 @@ const IBProgression = ({ ibProgression }) => {
         { displayName: "Proba cond", dbKey: "cond", label: "ib1", prevKey: null, nextKey: "bino" },
         { displayName: "Biniomiale", dbKey: "bino", label: "ib18", prevKey: "cond", nextKey: "va" },
         { displayName: "VA", dbKey: "va", label: "ib22", prevKey: "bino", nextKey: null },
+        { displayName: "Denombrer", dbKey: "dn", label: "ib14", prevKey: null, nextKey: null },
       ],
     },
     {
@@ -123,7 +124,7 @@ const IBProgression = ({ ibProgression }) => {
                       {group.items.map((item) => {
                         // 'value' (récupéré via dbKey, ex: "rec") correspond à l'état (ex: "S1", "S2") désormais srocké dans ib_progeleve
                         const value = trouverNoteIB(item.dbKey);
-                        
+
                         // 'ibNote' correspond à la note numérique (0 à 7) récupérée dans ib_progeleve
                         const ibNote = trouverNoteIB(item.label);
                         const numericNote = parseFloat(ibNote);
@@ -132,7 +133,7 @@ const IBProgression = ({ ibProgression }) => {
 
                         // LOGIQUE DE PROGRESSION :
                         const isStandalone = !item.prevKey && !item.nextKey;
-                        const isEmpty = ibNote === null || ibNote === "" || isNaN(numericNote);
+                        const isEmpty = ibNote === ""; //|| ibNote === ""; //|| isNaN(numericNote);
 
                         // 1. Vérifie si le pré-requis (le chapitre précédent défini par 'prevKey') est validé
                         const prevItem = group.items.find((i) => i.dbKey === item.prevKey);
@@ -140,16 +141,20 @@ const IBProgression = ({ ibProgression }) => {
 
                         // 2. ÉTATS DE LA NOTION :
                         // isDone : Validé (Vert)
-                        const isDone = numericNote >= 1 || (isStandalone && numericNote > 0);
+                        const isDone = numericNote >= 1;//|| (isStandalone && numericNote >= 1);
 
-                        // isLocked : Bloqué (Rose/Cadenas)
-                        const isLocked = !isDone && (!isPrevValidated || (isStandalone && isEmpty));
 
                         // isCurrent : Débloqué / À valider (Orange)
-                        const isCurrent = !isDone && !isLocked;
+                        const isCurrent = (!isDone && isPrevValidated) || (isStandalone && numericNote === 0);
 
-                        //  isfacultatif : si prevKey et nextKey sont null
-                        const isFacultatif = !item.prevKey && !item.nextKey;
+                        // isLocked : Bloqué (Rose/Cadenas)
+                        const isLocked = (!isDone && !isPrevValidated) || (isStandalone && numericNote <= -1);
+
+                        // isLocked : Bloqué (Rose/Cadenas)
+                        //const isLocked = !isPrevValidated || (isStandalone && isEmpty); //&& !isDone;
+
+                        // isCurrent : Débloqué / À valider (Orange)
+                        //const isCurrent = !isDone && !isLocked;
 
                         let display;
                         let statusColor = "";
@@ -169,7 +174,7 @@ const IBProgression = ({ ibProgression }) => {
                             <div className="flex flex-col items-center justify-center gap-1">
                               <span className="text-green-400 uppercase flex items-center gap-1">
                                 {value} {iblabel} <Check className="w-3 h-3 text-green-500" />
-                               
+
                               </span>
                               <div className="text-green-400 flex items-center gap-1">
                                 {/* {ibNote} {ibNote > 1 ? "briques" : "brique"} */}
@@ -187,7 +192,7 @@ const IBProgression = ({ ibProgression }) => {
                           display = (
                             <div className="flex items-center justify-center gap-1">
                               <span className="text-amber-500 font-medium italic text-[10px] uppercase">
-                                {iblabel} 
+                                {iblabel}
                               </span>
                               <span className="text-amber-500 font-medium italic text-[10px] ">
                                 {value} à valider
@@ -200,7 +205,7 @@ const IBProgression = ({ ibProgression }) => {
                           display = (
                             <div className="flex items-center justify-center gap-1">
                               <span className="text-amber-500 font-medium italic text-[10px] uppercase">
-                                {iblabel} 
+                                {iblabel}
                               </span>
                               <span className="text-amber-500 font-medium italic text-[10px] ">
                                 {value} à valider
@@ -218,8 +223,7 @@ const IBProgression = ({ ibProgression }) => {
                           >
                             <p className="text-[9px] wrap-break-word text-center font-bold text-slate-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">
                               {item.displayName} <br />
-                              {/* si le chapitre est facultatif, afficher "Facultatif" */}
-                              <span className="text-slate-500 font-medium italic text-[8px] ">{isFacultatif ? "Facultatif" : ""}</span>
+
                             </p>
                             <p className="text-xs text-center font-bold text-slate-100">
                               {display}
