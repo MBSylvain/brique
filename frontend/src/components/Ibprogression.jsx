@@ -155,7 +155,7 @@ const IBProgression = ({ ibProgression }) => {
                         let statusColor = "";
                         let isIBValidated = false;
                         // si le chapitre precedent n'est pas terminé et acquis (la note est < 1)
-                        if (isLocked && !isStandalone) {
+                        if (isLocked) {
                           display = (
                             <span className="text-rose-500 font-medium italic text-[10px] uppercase">
                               {iblabel}🔒
