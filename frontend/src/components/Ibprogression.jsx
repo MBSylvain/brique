@@ -21,7 +21,8 @@ const IBProgression = ({ ibProgression }) => {
   // La BDD stocke parfois des suffixes (ex: "ib2_rc" au lieu de juste "ib2")
   const trouverNoteIB = (labelRecherche) => {
     if (!labelRecherche) return null;
-    return ibDonnees[labelRecherche.toLowerCase()] || null;
+    const val = ibDonnees[labelRecherche.toLowerCase()];
+    return val !== undefined ? val : null;
   };
 
   // Helper pour vérifier si un item est validé (note >= 1)
@@ -58,6 +59,7 @@ const IBProgression = ({ ibProgression }) => {
         { displayName: "Suite Géo", dbKey: "sg", label: "ib5", prevKey: "cv", nextKey: "python" },
         { displayName: "Python", dbKey: "python", label: "ib7", prevKey: "sg", nextKey: "lim" },
         { displayName: "Limites", dbKey: "lim", label: "ib7b", prevKey: "python", nextKey: null },
+        
       ],
     },
     {
@@ -67,6 +69,7 @@ const IBProgression = ({ ibProgression }) => {
         { displayName: "Proba cond", dbKey: "cond", label: "ib1", prevKey: null, nextKey: "bino" },
         { displayName: "Biniomiale", dbKey: "bino", label: "ib18", prevKey: "cond", nextKey: "va" },
         { displayName: "VA", dbKey: "va", label: "ib22", prevKey: "bino", nextKey: null },
+        { displayName: "Dénombrement", dbKey: "dn", label: "ib14", prevKey: null, nextKey: null },
       ],
     },
     {
@@ -123,16 +126,17 @@ const IBProgression = ({ ibProgression }) => {
                       {group.items.map((item) => {
                         // 'value' (récupéré via dbKey, ex: "rec") correspond à l'état (ex: "S1", "S2") désormais srocké dans ib_progeleve
                         const value = trouverNoteIB(item.dbKey);
-                        
                         // 'ibNote' correspond à la note numérique (0 à 7) récupérée dans ib_progeleve
                         const ibNote = trouverNoteIB(item.label);
-                        const numericNote = parseFloat(ibNote);
+                        const numericNote = ibNote;
+                        console.log('valeur', ibNote);
                         // iblabel
                         const iblabel = item.label;
 
                         // LOGIQUE DE PROGRESSION :
                         const isStandalone = !item.prevKey && !item.nextKey;
                         const isEmpty = ibNote === null || ibNote === "" || isNaN(numericNote);
+                        const iszero = ibNote === 0;
 
                         // 1. Vérifie si le pré-requis (le chapitre précédent défini par 'prevKey') est validé
                         const prevItem = group.items.find((i) => i.dbKey === item.prevKey);
